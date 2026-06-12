@@ -1,5 +1,5 @@
 /**
- * Claude HTML Renderer Extension v.0.21
+ * Claude HTML Renderer Extension v.0.22
  *
  * Collapsible token badge + inline-styled model name:
  * 1. Level 3 (Learn): debugCodeBlocks() - understand DOM structure
@@ -144,10 +144,10 @@ function updateSessionTokenBadge(badge, state) {
 
   if (state.collapsed) {
     // Collapsed: just version + model
-    badge.innerHTML = `v.0.21 | ${modelHtml} <span style="opacity:0.7;">▸</span>`;
+    badge.innerHTML = `v.0.22 | ${modelHtml} <span style="opacity:0.7;">▸</span>`;
   } else {
-    // Expanded: full metrics
-    badge.innerHTML = `v.0.21 | Session: ${estimatedSessionTokens.toLocaleString()} | Last: ${lastPromptTokens} | Avg(10): ${avgLast10} | ${modelHtml} <span style="opacity:0.7;">▾</span>`;
+    // Expanded: full metrics (NOTE: these are estimates, not real API usage)
+    badge.innerHTML = `v.0.22 | ~Session: ${estimatedSessionTokens.toLocaleString()} | ~Last: ${lastPromptTokens} | ~Avg(10): ${avgLast10} | ${modelHtml} <span style="opacity:0.7;">▾</span>`;
   }
 }
 
@@ -418,7 +418,7 @@ function injectElements() {
     updateSessionTokenBadge(versionBadge, tokenState);
   };
 
-  console.log('✓ Claude HTML Renderer loaded - v.0.21');
+  console.log('✓ Claude HTML Renderer loaded - v.0.22');
 
   // Update badge immediately and every 2 seconds
   updateSessionTokenBadge(versionBadge, tokenState);
