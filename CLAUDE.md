@@ -106,6 +106,12 @@ cd ext/
 zip -r ../claude-html-renderer.zip .
 ```
 
+## Critical Remember (#remember)
+
+**DO NOT add MutationObserver to the extension** — v.0.4 tried this and broke the whole page. It's too aggressive on the DOM. Keep everything static and simple.
+
+**Don't repeat broken approaches** — If something failed (MutationObserver, dynamic updates), don't try it again unless we know it works in isolation first.
+
 ## Debugging Methodology (#debug #remember)
 
 **1/10th approach is ONLY for broken features, not for building known-good ones**
