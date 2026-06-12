@@ -256,6 +256,6 @@ When stuck on a task after 2-4 attempts: Don't keep trying fixes. Switch to Leve
 
 **Last Updated**: 2026-06-12  
 **Current Branch**: `claude/funny-cray-ydbigy`  
-**Current Version**: v.0.28  
+**Current Version**: v.0.29  
 **Versioning**: v.X.Y (2 digits only - v.0.10, v.0.11, etc.)  
-**Status**: v0.28 — delta tracking now uses the precise float % from the usage ring's SVG geometry (integer aria-label missed turns under 1% / ~2,000 tok), logs a console line per recorded episode, and the table notes when tracking has just started (log empty = all zeros until the next prompt). Read HANDOFF.md first.
+**Status**: v0.29 — REAL per-prompt cost. `scripts/show-cost.py` parses the on-disk transcript and (via the Stop hook) prints a full cost table every turn plus a hidden `⟦COSTDATA⟧…⟦END⟧` JSON marker. The extension's new `$` button scrapes that marker from the chat DOM and renders the per-prompt table (#, prompt, model, out, cache read, turn $, session total). Pre-commit hook now also enforces a version INCREMENT on every commit. Read HANDOFF.md first.

@@ -114,12 +114,43 @@ def k(n):
     return str(n)
 
 
-def fmt(i, turn, session_cost):
-    c = cost_of(turn['model'], turn['inp'], turn['cw'], turn['cr'], turn['out'])
-    model = turn['model'].replace('claude-', '') or '?'
-    return (f"#{i} ({turn['label']}) [{model}] "
-            f"in: {turn['inp']:,} | cache w/r: {k(turn['cw'])}/{k(turn['cr'])} | "
-            f"out: {turn['out']:,} | turn: ${c:.4f} | session: ${session_cost:.4f}")
+# Marker the browser extension scrapes from the chat DOM. The latest one
+# carries the FULL session table, so the extension only needs to find one.
+MARK_OPEN = '⟦COSTDATA⟧'
+MARK_CLOSE = '⟦END⟧'
+
+
+def enrich(turns):
+    """Attach per-turn cost + running session total to each turn dict."""
+    session = 0.0
+    rows = []
+    for idx, t in enumerate(turns, 1):
+        c = cost_of(t['model'], t['inp'], t['cw'], t['cr'], t['out'])
+        session += c
+        rows.append({
+            'n': idx,
+            'label': t['label'],
+            'model': t['model'].replace('claude-', '') or '?',
+            'in': t['inp'],
+            'cw': t['cw'],
+            'cr': t['cr'],
+            'out': t['out'],
+            'cost': round(c, 4),
+            'session': round(session, 4),
+        })
+    return rows, session
+
+
+def table(rows, session):
+    """Aligned monospace table — renders cleanly in chat and terminal."""
+    head = f"{'#':>2}  {'prompt':<26} {'model':<9} {'out':>6} {'cache r':>8} {'turn $':>8} {'cum $':>8}"
+    sep = '-' * len(head)
+    body = []
+    for r in rows:
+        body.append(f"{r['n']:>2}  {r['label'][:26]:<26} {r['model'][:9]:<9} "
+                     f"{k(r['out']):>6} {k(r['cr']):>8} {r['cost']:>8.4f} {r['session']:>8.4f}")
+    foot = f"\nsession total: ${session:.4f}  ({len(rows)} turns)"
+    return '\n'.join([head, sep] + body) + foot
 
 
 def main():
@@ -128,24 +159,18 @@ def main():
         print('show-cost: no transcript found')
         return
     turns = parse(path)
+    # Drop empty turns (interrupted prompts that carried no API usage).
+    turns = [t for t in turns if (t['inp'] + t['cw'] + t['cr'] + t['out']) > 0]
     if not turns:
         print('show-cost: no priced turns yet')
         return
 
-    session = 0.0
-    lines = []
-    for idx, turn in enumerate(turns, 1):
-        session += cost_of(turn['model'], turn['inp'], turn['cw'], turn['cr'], turn['out'])
-        lines.append(fmt(idx, turn, session))
+    rows, session = enrich(turns)
 
-    # Direct run: show all turns + a footer total. Hook: just the latest line.
-    if '--all' in sys.argv or sys.stdout.isatty():
-        print('\n'.join(lines))
-        last = turns[-1]
-        print(f"\nsession total: ${session:.4f}  ({len(turns)} turns, "
-              f"latest turn ${cost_of(last['model'], last['inp'], last['cw'], last['cr'], last['out']):.4f})")
-    else:
-        print(lines[-1])
+    # Always print the full table (the user wants this summary every turn).
+    print(table(rows, session))
+    # Hidden one-line marker with full data for the extension to scrape.
+    print(MARK_OPEN + json.dumps(rows, separators=(',', ':')) + MARK_CLOSE)
 
 
 if __name__ == '__main__':

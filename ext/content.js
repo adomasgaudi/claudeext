@@ -1,5 +1,5 @@
 /**
- * Claude HTML Renderer Extension v.0.28
+ * Claude HTML Renderer Extension v.0.29
  *
  * Elements (all static injection, no observers):
  * - inline token info next to the model name in the bottom toolbar:
@@ -17,7 +17,7 @@
  *   extension.
  */
 
-const EXT_VERSION = 'v.0.28';
+const EXT_VERSION = 'v.0.29';
 const CONTEXT_WINDOW = 200000; // standard Claude context window, used for token estimates
 const LOG_KEY = 'claudeExtTokenLog';
 const EPISODE_GAP_MS = 15000;  // ctx increases closer than this merge into one "prompt"
@@ -26,9 +26,14 @@ const WEEK_MS = 7 * 24 * 3600 * 1000;
 
 const state = {
   collapsed: true,
+  costOpen: false,
   lastPctByChat: {},        // pathname → last seen ctx %, so chat switches don't log fake deltas
   sessionStart: Date.now()
 };
+
+// Marker emitted by scripts/show-cost.py (Stop hook) into the chat. Contains
+// the FULL session cost table as JSON; we read the latest one we can see.
+const COST_RE = /⟦COSTDATA⟧(\[.*?\])⟦END⟧/g;
 
 let lastLoggedLabel = null;
 
@@ -173,6 +178,121 @@ function getPanel() {
   return panel;
 }
 
+function scrapeCostData() {
+  // The latest Stop-hook marker in the chat carries the full table.
+  // Transcript is virtualized but the newest hook output sits at the bottom
+  // (visible), so the most recent match is the freshest complete table.
+  const text = document.body.innerText || '';
+  let m, last = null;
+  COST_RE.lastIndex = 0;
+  while ((m = COST_RE.exec(text)) !== null) last = m[1];
+  if (!last) return null;
+  try { return JSON.parse(last); } catch (e) { return null; }
+}
+
+function money(n) {
+  return '$' + Number(n).toFixed(4);
+}
+
+function buildCostTableHtml(rows) {
+  if (!rows || !rows.length) {
+    return '<div style="font-size:11px;color:#666;max-width:240px;">' +
+      'No cost data yet. It appears after the Stop hook runs — ' +
+      'send a prompt, then reopen this.</div>';
+  }
+  const th = 'padding:2px 8px;text-align:right;color:#888;font-weight:600;border-bottom:1px solid #eee;';
+  const thl = th + 'text-align:left;';
+  const td = 'padding:2px 8px;text-align:right;font-variant-numeric:tabular-nums;';
+  const tdl = td + 'text-align:left;color:#444;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+  let session = 0;
+  const body = rows.map(function (r) {
+    session = r.session;
+    return '<tr>' +
+      '<td style="' + td + 'color:#aaa;">' + r.n + '</td>' +
+      '<td style="' + tdl + '" title="' + (r.label || '') + '">' + (r.label || '') + '</td>' +
+      '<td style="' + td + 'color:#888;">' + (r.model || '?') + '</td>' +
+      '<td style="' + td + '">' + (r.out || 0).toLocaleString() + '</td>' +
+      '<td style="' + td + 'color:#888;">' + (r.cr || 0).toLocaleString() + '</td>' +
+      '<td style="' + td + 'font-weight:600;color:#b45309;">' + money(r.cost) + '</td>' +
+      '</tr>';
+  }).join('');
+  const header = '<tr>' +
+    '<th style="' + th + '">#</th><th style="' + thl + '">prompt</th>' +
+    '<th style="' + th + '">model</th><th style="' + th + '">out</th>' +
+    '<th style="' + th + '">cache r</th><th style="' + th + '">turn $</th></tr>';
+  return '<div style="font-size:12px;font-weight:600;margin:0 8px 4px;color:#333;">' +
+    'Per-prompt cost — real, from transcript</div>' +
+    '<table style="border-collapse:collapse;font-size:11px;line-height:1.45;">' +
+    header + body + '</table>' +
+    '<div style="font-size:11px;font-weight:600;margin:4px 8px 0;color:#333;">' +
+    'session total: ' + money(session) + '</div>';
+}
+
+function getCostPanel() {
+  let panel = document.getElementById('claude-ext-cost-panel');
+  if (!panel || !panel.isConnected) {
+    panel = document.createElement('div');
+    panel.id = 'claude-ext-cost-panel';
+    panel.style.cssText = [
+      'position:fixed',
+      'z-index:2147483647',
+      'background:#fff',
+      'border:1px solid #d0d0d0',
+      'border-radius:8px',
+      'box-shadow:0 6px 18px rgba(0,0,0,0.16)',
+      'padding:8px 4px',
+      'max-height:60vh',
+      'overflow-y:auto',
+      'display:none',
+      'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
+      'color:#333'
+    ].join(';');
+    document.body.appendChild(panel);
+  }
+  return panel;
+}
+
+function renderCostButton(anchor) {
+  let btn = document.getElementById('claude-ext-cost-btn');
+  if (!btn || !btn.isConnected) {
+    btn = document.createElement('span');
+    btn.id = 'claude-ext-cost-btn';
+    btn.textContent = '$';
+    btn.style.cssText = [
+      'display:inline-flex',
+      'align-items:center',
+      'justify-content:center',
+      'width:16px',
+      'height:16px',
+      'font-size:12px',
+      'font-weight:700',
+      'color:#b45309',
+      'cursor:pointer',
+      'user-select:none',
+      'border-radius:4px',
+      'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif'
+    ].join(';');
+    btn.title = 'Show per-prompt cost table (real, from transcript)';
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      state.costOpen = !state.costOpen;
+      renderInline();
+    });
+    anchor.parentElement.insertBefore(btn, anchor);
+  }
+
+  const panel = getCostPanel();
+  if (state.costOpen) {
+    panel.innerHTML = buildCostTableHtml(scrapeCostData());
+    const rect = btn.getBoundingClientRect();
+    panel.style.bottom = Math.round(window.innerHeight - rect.top + 6) + 'px';
+    panel.style.right = Math.max(6, Math.round(window.innerWidth - rect.right)) + 'px';
+    panel.style.display = 'block';
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
 function renderInline() {
   const usage = readUsage();
   if (!usage) return; // toolbar not rendered yet; retry on next tick
@@ -204,6 +324,8 @@ function renderInline() {
     });
     usage.anchor.parentElement.insertBefore(el, usage.anchor);
   }
+
+  renderCostButton(usage.anchor);
 
   const panel = getPanel();
 
@@ -261,4 +383,4 @@ function tick() {
 tick();
 setInterval(tick, 2000);
 
-console.log('✓ Claude HTML Renderer loaded - v.0.28');
+console.log('✓ Claude HTML Renderer loaded - v.0.29');
