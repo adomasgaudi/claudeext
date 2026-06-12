@@ -1,5 +1,5 @@
 /**
- * Claude HTML Renderer Extension v.0.27
+ * Claude HTML Renderer Extension v.0.28
  *
  * Elements (all static injection, no observers):
  * - inline token info next to the model name in the bottom toolbar:
@@ -17,7 +17,7 @@
  *   extension.
  */
 
-const EXT_VERSION = 'v.0.27';
+const EXT_VERSION = 'v.0.28';
 const CONTEXT_WINDOW = 200000; // standard Claude context window, used for token estimates
 const LOG_KEY = 'claudeExtTokenLog';
 const EPISODE_GAP_MS = 15000;  // ctx increases closer than this merge into one "prompt"
@@ -44,10 +44,13 @@ function saveLog(log) {
 // Only context-ring INCREASES are logged; drops (compaction, new chat) just
 // reset the baseline.
 function trackDelta(ctxPct) {
+  // ctxPct is a FLOAT (precise, from SVG ring geometry when available).
+  // Integer aria-label percentages miss any turn under 1% (~2,000 tok).
   const chat = location.pathname;
   const prev = state.lastPctByChat[chat];
   state.lastPctByChat[chat] = ctxPct;
-  if (prev === undefined || ctxPct <= prev) return;
+  if (prev === undefined) return;
+  if (ctxPct - prev < 0.05) return; // below ring resolution / no growth
 
   const tok = Math.round((ctxPct - prev) / 100 * CONTEXT_WINDOW);
   const now = Date.now();
@@ -61,6 +64,8 @@ function trackDelta(ctxPct) {
   }
   while (log.length && log[0].t < now - WEEK_MS) log.shift();
   saveLog(log);
+  console.log('Claude ext: recorded +' + tok.toLocaleString() + ' tok (ctx ' +
+    prev.toFixed(1) + '% → ' + ctxPct.toFixed(1) + '%)');
 }
 
 function sumLast(log, n) {
@@ -85,14 +90,15 @@ function fmtPct(tok) {
 }
 
 function ringPctFromSvg(usageBtn) {
-  // Fallback: the ring itself encodes the percentage.
+  // The ring encodes the percentage precisely (float) — better resolution
+  // than the integer aria-label, so deltas under 1% are still caught.
   const circles = usageBtn.querySelectorAll('svg circle');
   if (circles.length < 2) return null;
   const c = circles[1];
   const dash = parseFloat(c.getAttribute('stroke-dasharray'));
   const offset = parseFloat(c.getAttribute('stroke-dashoffset'));
   if (!isFinite(dash) || !isFinite(offset) || dash <= 0) return null;
-  return Math.round((1 - offset / dash) * 100);
+  return (1 - offset / dash) * 100;
 }
 
 function readUsage() {
@@ -105,17 +111,19 @@ function readUsage() {
   const ctx = label.match(/context[^0-9]*?(\d+(?:\.\d+)?)\s*%/i);
   const plan = label.match(/plan[^0-9]*?(\d+(?:\.\d+)?)\s*%/i);
 
-  let contextPct = ctx ? Math.round(parseFloat(ctx[1])) : null;
-  const planPct = plan ? Math.round(parseFloat(plan[1])) : null;
+  // Prefer the precise SVG value for delta tracking; aria-label as fallback.
+  let precisePct = ringPctFromSvg(usageBtn);
+  if (precisePct === null && ctx) precisePct = parseFloat(ctx[1]);
 
-  if (contextPct === null) contextPct = ringPctFromSvg(usageBtn);
+  const contextPct = precisePct !== null ? Math.round(precisePct) : null;
+  const planPct = plan ? Math.round(parseFloat(plan[1])) : null;
 
   if (contextPct === null && label !== lastLoggedLabel) {
     lastLoggedLabel = label;
     console.log('Claude ext: could not parse usage from aria-label:', JSON.stringify(label));
   }
 
-  return { contextPct: contextPct, planPct: planPct, anchor: usageBtn };
+  return { contextPct: contextPct, precisePct: precisePct, planPct: planPct, anchor: usageBtn };
 }
 
 function buildTableHtml(log, usage) {
@@ -136,8 +144,11 @@ function buildTableHtml(log, usage) {
       '<td style="' + cell + '">' + fmtTok(r[1]) + '</td>' +
       '<td style="' + cell + 'color:#888;">' + pct + '</td></tr>';
   }).join('');
+  const note = log.length === 0
+    ? 'tracking starts now — counts appear after your next prompt'
+    : '~ estimated from context-ring deltas';
   return '<table style="border-collapse:collapse;font-size:11px;line-height:1.5;">' + html + '</table>' +
-    '<div style="font-size:9px;color:#999;margin-top:3px;">~ estimated from context-ring deltas</div>';
+    '<div style="font-size:9px;color:#999;margin-top:3px;">' + note + '</div>';
 }
 
 function getPanel() {
@@ -166,7 +177,7 @@ function renderInline() {
   const usage = readUsage();
   if (!usage) return; // toolbar not rendered yet; retry on next tick
 
-  if (usage.contextPct !== null) trackDelta(usage.contextPct);
+  if (usage.precisePct !== null) trackDelta(usage.precisePct);
 
   let el = document.getElementById('claude-ext-usage-inline');
   if (!el || !el.isConnected) {
@@ -250,4 +261,4 @@ function tick() {
 tick();
 setInterval(tick, 2000);
 
-console.log('✓ Claude HTML Renderer loaded - v.0.27');
+console.log('✓ Claude HTML Renderer loaded - v.0.28');
