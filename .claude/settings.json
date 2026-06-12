@@ -1,0 +1,20 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "/home/user/claudeext/.claude/token-cost-calculator.sh --status",
+    "refreshInterval": 2
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/user/claudeext/.claude/token-cost-calculator.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

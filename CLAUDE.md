@@ -214,6 +214,25 @@ When stuck on a task after 2-4 attempts: Don't keep trying fixes. Switch to Leve
 
 **This is NON-NEGOTIABLE.** Every single response needs this.
 
+### Automated Token Tracking Setup
+
+**Status Line** (bottom bar):
+- Shows: `📊 [tokens] tokens | $[cost] | [model] ([multiplier]×)`
+- Updates every 2 seconds during work
+- Command: `.claude/token-cost-calculator.sh --status`
+
+**Stop Hook** (end of turn):
+- Shows detailed breakdown: model, input/output tokens, costs, multiplier
+- Configured in `.claude/settings.json`
+- Runs after every turn to display cost summary
+
+**Model Multiplier Pricing** (vs Sonnet baseline):
+| Model | Input | Output | Multiplier |
+|-------|-------|--------|-----------|
+| Haiku | $0.80/M | $2.40/M | 0.27× |
+| Sonnet | $3.00/M | $15.00/M | 1.00× |
+| Opus | $15.00/M | $60.00/M | 5.00× |
+
 ## Future AI Instructions
 
 - **Always update version before commit** — it should be updated in ALL relevant files (manifest.json, popup.html, content.js header, content.js console.log)
