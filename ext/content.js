@@ -1,7 +1,10 @@
 /**
- * Claude HTML Renderer Extension v.0.14
+ * Claude HTML Renderer Extension v.0.15
  *
- * 4/10ths: Search within code blocks for markers
+ * Three-level work strategy:
+ * 1. Level 3 (Learn): debugCodeBlocks() - understand DOM structure
+ * 2. Level 2 (Parallel): Debug Info button - probe safely
+ * 3. Level 1 (Safe): Enhanced popup, feature list
  * Parse special markers from Claude responses:
  * - Font size: <!-- FONT-SIZE: 24 -->
  * - Render HTML: <!-- RENDER-HTML --> <button>Click</button>
@@ -255,10 +258,10 @@ function injectElements() {
 
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
-  versionBadge.textContent = 'v.0.14';
+  versionBadge.textContent = 'v.0.15';
   document.body.appendChild(versionBadge);
 
-  console.log('✓ Claude HTML Renderer loaded - v.0.14');
+  console.log('✓ Claude HTML Renderer loaded - v.0.15');
 
   // Level 3: Debug the DOM structure
   debugCodeBlocks();
