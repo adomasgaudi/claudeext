@@ -1,5 +1,5 @@
 /**
- * Claude HTML Renderer Extension v.0.7
+ * Claude HTML Renderer Extension v.0.8.1
  *
  * Parse special markers from Claude responses and apply font size changes
  * Marker format: <!-- FONT-SIZE: 24 -->
@@ -120,7 +120,7 @@ function injectElements() {
   versionBadge.textContent = 'v.0.7';
   document.body.appendChild(versionBadge);
 
-  console.log('✓ Claude HTML Renderer loaded - v.0.7 (parses FONT-SIZE marker)');
+  console.log('✓ Claude HTML Renderer loaded - v.0.8.1');
 }
 
 injectElements();
