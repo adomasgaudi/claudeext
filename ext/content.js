@@ -1,7 +1,7 @@
 /**
- * Claude HTML Renderer Extension v.0.19
+ * Claude HTML Renderer Extension v.0.20
  *
- * Live token tracking: session, last prompt, last 10 average:
+ * Token tracking with model display and selective bolding:
  * 1. Level 3 (Learn): debugCodeBlocks() - understand DOM structure
  * 2. Level 2 (Parallel): Token tracking, input counter, prompt history
  * 3. Level 1 (Safe): Enhanced popup, token display, cost calculator
@@ -130,8 +130,17 @@ function updateSessionTokenBadge(badge, state) {
     ? Math.round(state.promptHistory.reduce((a, b) => a + b, 0) / state.promptHistory.length)
     : 0;
 
-  // Update badge: v.0.19 | Session: 50,720 | Last: 380 | Avg(10): 285
-  badge.textContent = `v.0.19 | Session: ${estimatedSessionTokens.toLocaleString()} | Last: ${lastPromptTokens} | Avg(10): ${avgLast10}`;
+  // Get model name from environment or default to Haiku
+  const modelName = (typeof window !== 'undefined' && window.__claude_model)
+    ? window.__claude_model
+    : 'Haiku 4.5';
+
+  // Extract just the model family (e.g., "Haiku" from "Haiku 4.5")
+  const modelFamily = modelName.split(' ')[0];
+
+  // Update badge with HTML formatting (bold only the model family)
+  // v.0.20 | Session: 50,720 | Last: 380 | Avg(10): 285 | <b>Haiku</b> 4.5
+  badge.innerHTML = `v.0.20 | Session: ${estimatedSessionTokens.toLocaleString()} | Last: ${lastPromptTokens} | Avg(10): ${avgLast10} | <b>${modelFamily}</b> ${modelName.slice(modelFamily.length).trim()}`;
 }
 
 function setupTokenCounter() {
@@ -322,9 +331,13 @@ function injectElements() {
       z-index: 10000;
       font-weight: 500;
       white-space: nowrap;
-      max-width: 400px;
+      max-width: 450px;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    .claude-ext-version b {
+      font-weight: 700;
+      letter-spacing: 0.3px;
     }
 
     .claude-ext-html-render {
@@ -388,7 +401,7 @@ function injectElements() {
     promptHistory: [] // Last 10 prompt token counts
   };
 
-  console.log('✓ Claude HTML Renderer loaded - v.0.19');
+  console.log('✓ Claude HTML Renderer loaded - v.0.20');
 
   // Update badge immediately and every 2 seconds
   updateSessionTokenBadge(versionBadge, tokenState);
