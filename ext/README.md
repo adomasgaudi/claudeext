@@ -33,18 +33,21 @@ For permanent Firefox installation:
 
 ## Testing
 
-**Current version (v.0.4)**: Injects a bar chart diagram and version badge.
+**Current version (v.0.4)**: Dynamic bar chart that updates when Claude sends responses.
 
-When you load the extension and visit claude.ai, you should see:
-- **Chart panel** (top-right): A simple SVG bar chart showing demo data
-- **Version badge** (bottom-right): Small badge showing "v.0.4"
+When you load the extension and visit claude.ai:
+1. **Chart panel** (top-right): A bar chart labeled "Response Data"
+2. **Version badge** (bottom-right): Small badge showing "v.0.4"
+3. **Dynamic updates**: Each time Claude sends a response, the chart values change
 
-You'll also see the console message:
+The extension watches for DOM mutations (new messages) and updates the chart data accordingly.
+
+Console message:
 ```
-✓ Claude HTML Renderer loaded - v.0.4
+✓ Claude HTML Renderer loaded - v.0.4 (dynamic chart)
 ```
 
-To check: Press `F12` → Console tab → look for the message. The chart should be visible in the top-right corner.
+To test: Send a message to Claude and watch the chart update in real-time!
 
 ## Usage
 

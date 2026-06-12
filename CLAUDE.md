@@ -119,4 +119,4 @@ zip -r ../claude-html-renderer.zip .
 **Current Branch**: `claude/funny-cray-ydbigy`  
 **Current Version**: v.0.4  
 **Versioning**: v.X.Y (X=major, Y=increments for features, .Z for patches)  
-**Status**: Testing chart/diagram injection - SVG bar chart demo
+**Status**: Dynamic chart that updates on Claude responses (MutationObserver monitoring)

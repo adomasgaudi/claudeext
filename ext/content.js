@@ -1,43 +1,64 @@
 /**
  * Claude HTML Renderer Extension v.0.4
  *
- * Inject chart/diagram and version badge
+ * Dynamic chart that updates based on Claude responses
  */
 
-function injectChart() {
-  // Create a simple SVG bar chart
-  const chartSvg = `
+let messageCount = 0;
+const chartData = [70, 110, 90, 130];
+
+function generateChartSvg(data) {
+  const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe'];
+  const maxHeight = 130;
+
+  let bars = '';
+  data.forEach((height, i) => {
+    const x = 30 + i * 60;
+    const y = 195 - height;
+    bars += `<rect x="${x}" y="${y}" width="40" height="${height}" fill="${colors[i]}" rx="4"/>`;
+  });
+
+  const labels = data.map((val, i) => {
+    const x = 50 + i * 60;
+    return `<text x="${x}" y="195" font-size="12" fill="#666" text-anchor="middle">${val}</text>`;
+  }).join('');
+
+  return `
     <svg width="300" height="200" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
-      <!-- Grid background -->
       <rect width="300" height="200" fill="#f9fafb"/>
-
-      <!-- Bars -->
-      <rect x="30" y="120" width="40" height="70" fill="#667eea" rx="4"/>
-      <rect x="90" y="80" width="40" height="110" fill="#764ba2" rx="4"/>
-      <rect x="150" y="100" width="40" height="90" fill="#f093fb" rx="4"/>
-      <rect x="210" y="60" width="40" height="130" fill="#4facfe" rx="4"/>
-
-      <!-- Labels -->
-      <text x="50" y="195" font-size="12" fill="#666" text-anchor="middle">Jan</text>
-      <text x="110" y="195" font-size="12" fill="#666" text-anchor="middle">Feb</text>
-      <text x="170" y="195" font-size="12" fill="#666" text-anchor="middle">Mar</text>
-      <text x="230" y="195" font-size="12" fill="#666" text-anchor="middle">Apr</text>
-
-      <!-- Axis lines -->
+      ${bars}
+      ${labels}
       <line x1="20" y1="195" x2="270" y2="195" stroke="#ddd" stroke-width="1"/>
       <line x1="20" y1="30" x2="20" y2="195" stroke="#ddd" stroke-width="1"/>
     </svg>
   `;
+}
 
-  // Create chart container
+function updateChart() {
+  // Update chart data based on response
+  messageCount++;
+  const newValues = chartData.map(v => Math.max(40, v + Math.random() * 40 - 20));
+  const chartSvg = generateChartSvg(newValues);
+
+  const chartDiv = document.querySelector('.claude-ext-chart');
+  if (chartDiv) {
+    const svgContainer = chartDiv.querySelector('div:last-child');
+    if (svgContainer) {
+      svgContainer.innerHTML = chartSvg;
+    }
+  }
+}
+
+function injectChart() {
+  const chartSvg = generateChartSvg(chartData);
+
   const chartContainer = document.createElement('div');
   chartContainer.className = 'claude-ext-chart';
   chartContainer.innerHTML = `
-    <div style="font-weight: 600; margin-bottom: 12px; color: #374151;">Extension Chart Demo</div>
-    ${chartSvg}
+    <div style="font-weight: 600; margin-bottom: 12px; color: #374151;">Response Data</div>
+    <div>${chartSvg}</div>
   `;
 
-  // Create styles
   const style = document.createElement('style');
   style.textContent = `
     .claude-ext-chart {
@@ -71,15 +92,23 @@ function injectChart() {
   `;
   document.head.appendChild(style);
 
-  // Add chart to page
   document.body.appendChild(chartContainer);
 
-  // Add version badge
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
   versionBadge.textContent = 'v.0.4';
   document.body.appendChild(versionBadge);
+
+  // Watch for new Claude responses
+  const observer = new MutationObserver(() => {
+    updateChart();
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
 }
 
 injectChart();
-console.log('✓ Claude HTML Renderer loaded - v.0.4');
+console.log('✓ Claude HTML Renderer loaded - v.0.4 (dynamic chart)');
