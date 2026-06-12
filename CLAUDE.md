@@ -108,6 +108,11 @@ zip -r ../claude-html-renderer.zip .
 
 ## Debugging Methodology (#debug #remember)
 
+**1/10th approach is ONLY for broken features, not for building known-good ones**
+- Don't incrementally build features we already know work (badge, styling, injection)
+- Use 1/10th, 2/10ths, 4/10ths ONLY when something is broken
+- For new features: go full-speed, test once
+
 **When something breaks: Exponential/doubling approach**
 1. Start with 1/10th of the task complexity
 2. Test it works
@@ -115,10 +120,9 @@ zip -r ../claude-html-renderer.zip .
 4. If no → go to 1/100th (baby steps)
 
 **Debugging philosophy: Component isolation**
-- Like checking a broken TV: check wires first, test wire in different setting, check outlet with other devices
-- Always check each component separately
-- Start from what you KNOW works and build incrementally
-- Never add multiple things at once
+- Check each component separately in isolation
+- Start from what you KNOW works and build from there
+- Don't re-test known-working components
 
 **Example**: Chart broke the page
 - ✓ We know v.0.3 (yellow text) worked
@@ -137,6 +141,6 @@ zip -r ../claude-html-renderer.zip .
 
 **Last Updated**: 2026-06-12  
 **Current Branch**: `claude/funny-cray-ydbigy`  
-**Current Version**: v.0.4.3  
+**Current Version**: v.0.5  
 **Versioning**: v.X.Y.Z (X=major, Y=features, Z=patches/small changes)  
-**Status**: Debugging DOM selectors - yellow styling not applying, added console logging to identify correct selectors
+**Status**: Static chart injection working - badge + SVG chart (no observers)

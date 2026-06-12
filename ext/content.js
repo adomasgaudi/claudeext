@@ -1,21 +1,39 @@
 /**
- * Claude HTML Renderer Extension v.0.4.3
+ * Claude HTML Renderer Extension v.0.5
  *
- * 2/10ths effort: Version badge + yellow styling on Claude responses
- * Debugging: Added broader selectors and console logging
+ * Static SVG chart injection (no observers, no dynamic features)
  */
 
-function injectElements() {
+function injectChart() {
+  const chartSvg = `
+    <svg width="280" height="180" viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+      <rect width="280" height="180" fill="#f9fafb"/>
+      <rect x="25" y="110" width="35" height="60" fill="#667eea" rx="3"/>
+      <rect x="75" y="70" width="35" height="100" fill="#764ba2" rx="3"/>
+      <rect x="125" y="90" width="35" height="80" fill="#f093fb" rx="3"/>
+      <rect x="175" y="50" width="35" height="120" fill="#4facfe" rx="3"/>
+      <text x="42" y="175" font-size="11" fill="#666" text-anchor="middle">A</text>
+      <text x="92" y="175" font-size="11" fill="#666" text-anchor="middle">B</text>
+      <text x="142" y="175" font-size="11" fill="#666" text-anchor="middle">C</text>
+      <text x="192" y="175" font-size="11" fill="#666" text-anchor="middle">D</text>
+      <line x1="15" y1="170" x2="220" y2="170" stroke="#ddd" stroke-width="1"/>
+      <line x1="15" y1="25" x2="15" y2="170" stroke="#ddd" stroke-width="1"/>
+    </svg>
+  `;
+
   const style = document.createElement('style');
   style.textContent = `
-    /* Claude response styling - broader selectors */
-    [data-message-role="assistant"] *,
-    [data-role="assistant"] *,
-    .message.assistant *,
-    .assistant-message *,
-    [class*="assistant"] *,
-    [class*="response"] * {
-      color: yellow !important;
+    .claude-ext-chart {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: white;
+      padding: 14px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      z-index: 9999;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 12px;
     }
 
     .claude-ext-version {
@@ -35,21 +53,17 @@ function injectElements() {
   `;
   document.head.appendChild(style);
 
+  const chartContainer = document.createElement('div');
+  chartContainer.className = 'claude-ext-chart';
+  chartContainer.innerHTML = chartSvg;
+  document.body.appendChild(chartContainer);
+
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
-  versionBadge.textContent = 'v.0.4.3';
+  versionBadge.textContent = 'v.0.5';
   document.body.appendChild(versionBadge);
 
-  // Debug: log DOM structure to help identify correct selectors
-  console.log('✓ Claude HTML Renderer loaded - v.0.4.3');
-  console.log('Searching for message containers...');
-  const allDivs = document.querySelectorAll('[class*="message"], [class*="response"], [data-role], [data-message-role]');
-  console.log(`Found ${allDivs.length} potential message elements`);
-  if (allDivs.length > 0) {
-    console.log('First element:', allDivs[0]);
-    console.log('Classes:', allDivs[0].className);
-    console.log('Attributes:', Array.from(allDivs[0].attributes).map(a => `${a.name}="${a.value}"`).join(', '));
-  }
+  console.log('✓ Claude HTML Renderer loaded - v.0.5 (static chart)');
 }
 
-injectElements();
+injectChart();
