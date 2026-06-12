@@ -247,6 +247,6 @@ When stuck on a task after 2-4 attempts: Don't keep trying fixes. Switch to Leve
 
 **Last Updated**: 2026-06-12  
 **Current Branch**: `claude/funny-cray-ydbigy`  
-**Current Version**: v.0.15  
+**Current Version**: v.0.16  
 **Versioning**: v.X.Y (2 digits only - v.0.10, v.0.11, etc.)  
-**Status**: Level 1-3 work: Safe upgrades, Parallel experience (Debug button), Learn DOM structure
+**Status**: Token tracking setup + DOM learning + parallel experience work
