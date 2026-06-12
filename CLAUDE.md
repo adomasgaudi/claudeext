@@ -108,6 +108,14 @@ zip -r ../claude-html-renderer.zip .
 
 ## Critical Remember (#remember)
 
+**⚠️ VERSION UPDATES — NON-NEGOTIABLE (#never)**
+Before every git commit:
+1. Update `ext/manifest.json` version field
+2. Update `ext/popup.html` version display
+3. Update `ext/content.js` version in header comment AND console.log
+4. Update any other version references
+**THIS IS NOT OPTIONAL. Not even once. No commits without version updates.**
+
 **DO NOT add MutationObserver to the extension** — v.0.4 tried this and broke the whole page. It's too aggressive on the DOM. Keep everything static and simple.
 
 **Don't repeat broken approaches** — If something failed (MutationObserver, dynamic updates), don't try it again unless we know it works in isolation first.
@@ -147,18 +155,28 @@ zip -r ../claude-html-renderer.zip .
 - ✗ v.0.4 (MutationObserver + chart) broke it
 - Solution: Go back to yellow text (1/10th effort), add something tiny first
 
+## Three-Level Work Strategy (#remember)
+
+Work on 3 parallel tracks to avoid getting stuck:
+1. **Level 1 (Safe)**: Easy upgrades to stable features (documentation, UI polish, minor enhancements)
+2. **Level 2 (Parallel Experience)**: Medium-difficulty tasks outside comfort zone but achievable (~1 bug per 5-10 prompts)
+3. **Level 3 (Learn)**: Failing/stuck tasks — focus on understanding structure, not completing
+
+When stuck on a task after 2-4 attempts: Don't keep trying fixes. Switch to Level 2 or Level 1, come back later with fresh perspective.
+
 ## Future AI Instructions
 
-- **Always check version** before marking tasks complete — it should be updated in all relevant files
+- **Always update version before commit** — it should be updated in ALL relevant files (manifest.json, popup.html, content.js header, content.js console.log)
 - **Test in browser** for any UI changes — don't just verify code logic
 - **Document DOM issues** if they arise — include actual selectors from `claude.ai`'s DOM
 - **Keep this file updated** as new features or issues emerge
 - **When debugging**: Use exponential approach (1/10th → 2/10th → 4/10th → 8/10th)
+- **Work in parallel**: Don't get stuck on one task — work on 3 levels simultaneously
 
 ---
 
 **Last Updated**: 2026-06-12  
 **Current Branch**: `claude/funny-cray-ydbigy`  
-**Current Version**: v.0.12  
+**Current Version**: v.0.15  
 **Versioning**: v.X.Y (2 digits only - v.0.10, v.0.11, etc.)  
-**Status**: 2/10ths - extract full HTML and attempt rendering
+**Status**: Level 1-3 work: Safe upgrades, Parallel experience (Debug button), Learn DOM structure
