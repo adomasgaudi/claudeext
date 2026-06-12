@@ -20,9 +20,11 @@ This repository contains two complementary tools for the Claude Code environment
 Users: `chrome://extensions` → Developer mode → Load unpacked → select `ext/` folder. Download link available in `ext/README.md`.
 
 ### Current Status
-- **Status**: Under development
-- **Known Issue**: The `<!-- RENDER -->` test did not show the ▼ Preview button. Root cause unknown — likely either (a) Claude's chat DOM structure uses a different selector than `pre code` / `pre`, or (b) the extension isn't active on the `claude.ai` domain.
-- **Next Step**: Fix `content.js` to match the actual DOM selectors Claude's chat uses for code blocks. Can inspect `claude.ai`'s DOM via DevTools (F12 → Console) or check session console output for errors.
+- **Status**: Under development - Level 1-3 work in progress
+- **DOM Discovery (v0.15)**: Claude uses `<CODE>` elements for inline code snippets, NOT `<pre>` or full code blocks
+  - Found 12 code elements on page, all are `<CODE>` tags with class=""
+  - This explains extraction failures - we were looking for wrong selectors
+- **Next Step**: Research whether Claude has dedicated code block containers, or if HTML rendering needs different approach (shadow DOM, iframes, etc.)
 
 ### Testing
 Check extension status with console command in Claude chat:
@@ -201,6 +203,16 @@ Work on 3 parallel tracks to avoid getting stuck:
 
 When stuck on a task after 2-4 attempts: Don't keep trying fixes. Switch to Level 2 or Level 1, come back later with fresh perspective.
 
+## Token Usage Tracking (#remember)
+
+**Show token costs for every major prompt/work block:**
+- After significant sections of work, display estimated token usage
+- Track in `.claude/token-tracking.md` for reference
+- Format: `[Prompt #N] Task: X tokens, ~$Y cost`
+- Helps identify expensive operations and optimize workflow
+
+**This is NOT optional.** Token awareness is part of responsible development.
+
 ## Future AI Instructions
 
 - **Always update version before commit** — it should be updated in ALL relevant files (manifest.json, popup.html, content.js header, content.js console.log)
@@ -209,6 +221,7 @@ When stuck on a task after 2-4 attempts: Don't keep trying fixes. Switch to Leve
 - **Keep this file updated** as new features or issues emerge
 - **When debugging**: Use exponential approach (1/10th → 2/10th → 4/10th → 8/10th)
 - **Work in parallel**: Don't get stuck on one task — work on 3 levels simultaneously
+- **Show token costs**: Display usage after major work blocks, track in token-tracking.md
 
 ---
 
