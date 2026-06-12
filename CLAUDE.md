@@ -134,6 +134,15 @@ Before every git commit:
 - Always increment the 2nd digit: v.0.9 → v.0.10 → v.0.11
 - Never go backwards or skip versions
 
+## Response Format: Levels of Detail (#remember)
+
+**ALWAYS write replies in multiple levels of detail — never an essay:**
+1. **Level 1**: 2-5 words
+2. **Level 2**: 5-15 words
+3. **Level 3**: 15-50 words (never more)
+
+No long prose. The reader picks their depth.
+
 ## Debugging Methodology (#debug #remember)
 
 **1/10th approach is ONLY for broken features, not for building known-good ones**
