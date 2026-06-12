@@ -137,6 +137,6 @@ zip -r ../claude-html-renderer.zip .
 
 **Last Updated**: 2026-06-12  
 **Current Branch**: `claude/funny-cray-ydbigy`  
-**Current Version**: v.0.4.1  
+**Current Version**: v.0.4.2  
 **Versioning**: v.X.Y.Z (X=major, Y=features, Z=patches/small changes)  
-**Status**: Debugging - v.0.4 broke page, reverted to minimal element (1/10th effort)
+**Status**: Debugging progression - v.0.4.1 (1/10th) works, now testing v.0.4.2 (2/10ths)

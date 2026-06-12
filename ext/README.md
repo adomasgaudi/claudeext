@@ -1,6 +1,6 @@
 # Claude HTML Renderer Extension
 
-**Version: v.0.4.1**
+**Version: v.0.4.2**
 
 A browser extension that renders HTML code blocks in Claude chat as live previews.
 
@@ -33,19 +33,20 @@ For permanent Firefox installation:
 
 ## Testing
 
-**Current version (v.0.4.1)**: Minimal static element (debugging version).
+**Current version (v.0.4.2)**: Version badge + yellow Claude responses.
 
 When you load the extension and visit claude.ai:
-1. **Version badge** (bottom-right): Small badge showing "v.0.4.1"
-2. NO dynamic features, NO observers, NO chart
-3. This is a baseline test to ensure the extension doesn't break the page
+1. **Version badge** (bottom-right): Small badge showing "v.0.4.2"
+2. **Yellow text**: Claude's responses should appear yellow
+3. NO observers, NO dynamic updates, NO charts
+4. This tests styling + badge together
 
 Console message:
 ```
-✓ Claude HTML Renderer loaded - v.0.4.1
+✓ Claude HTML Renderer loaded - v.0.4.2
 ```
 
-To test: Reload claude.ai - page should load normally with version badge visible.
+To test: Reload claude.ai - send a message and check if Claude's response is yellow.
 
 ## Usage
 

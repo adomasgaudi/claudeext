@@ -1,12 +1,20 @@
 /**
- * Claude HTML Renderer Extension v.0.4.1
+ * Claude HTML Renderer Extension v.0.4.2
  *
- * 1/10th effort: Simple static element injection (no observers, no charts)
+ * 2/10ths effort: Version badge + yellow styling on Claude responses
  */
 
-function injectSimpleElement() {
+function injectElements() {
   const style = document.createElement('style');
   style.textContent = `
+    /* Claude response styling */
+    [data-message-role="assistant"],
+    [data-role="assistant"],
+    .message.assistant,
+    .response {
+      color: yellow !important;
+    }
+
     .claude-ext-version {
       position: fixed;
       bottom: 20px;
@@ -26,9 +34,9 @@ function injectSimpleElement() {
 
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
-  versionBadge.textContent = 'v.0.4.1';
+  versionBadge.textContent = 'v.0.4.2';
   document.body.appendChild(versionBadge);
 }
 
-injectSimpleElement();
-console.log('✓ Claude HTML Renderer loaded - v.0.4.1');
+injectElements();
+console.log('✓ Claude HTML Renderer loaded - v.0.4.2');
