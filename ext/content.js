@@ -1,8 +1,9 @@
 /**
- * Claude HTML Renderer Extension v.0.8.1
+ * Claude HTML Renderer Extension v.0.9
  *
- * Parse special markers from Claude responses and apply font size changes
- * Marker format: <!-- FONT-SIZE: 24 -->
+ * Parse special markers from Claude responses:
+ * - Font size: <!-- FONT-SIZE: 24 -->
+ * - Render HTML: <!-- RENDER-HTML --> <button>Click</button>
  */
 
 function applyFontSize() {
@@ -30,6 +31,36 @@ function applyFontSize() {
     alert(`Font size updated to ${fontSize}px`);
   } else {
     alert('No FONT-SIZE marker found in page');
+  }
+}
+
+function renderHTML() {
+  // Search for RENDER-HTML marker and extract HTML
+  const bodyHTML = document.body.innerHTML;
+  const renderMatch = bodyHTML.match(/<!-- RENDER-HTML -->\s*([\s\S]*?)(?=<\/code>|<\/pre>|$)/);
+
+  if (renderMatch) {
+    let htmlContent = renderMatch[1].trim();
+    // Clean up HTML entities if needed
+    htmlContent = htmlContent.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+
+    // Create container for rendered HTML
+    const container = document.createElement('div');
+    container.className = 'claude-ext-html-render';
+    container.innerHTML = htmlContent;
+
+    // Insert before or after existing content
+    const existingRender = document.querySelector('.claude-ext-html-render');
+    if (existingRender) {
+      existingRender.replaceWith(container);
+    } else {
+      document.body.insertBefore(container, document.body.firstChild);
+    }
+
+    console.log('✓ Rendered HTML');
+    alert('HTML rendered on page!');
+  } else {
+    alert('No RENDER-HTML marker found in page');
   }
 }
 
@@ -101,6 +132,19 @@ function injectElements() {
       z-index: 10000;
       font-weight: 600;
     }
+
+    .claude-ext-html-render {
+      position: fixed;
+      top: 220px;
+      right: 20px;
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      z-index: 9998;
+      max-width: 300px;
+      border: 2px solid #667eea;
+    }
   `;
   document.head.appendChild(style);
 
@@ -109,18 +153,26 @@ function injectElements() {
   chartContainer.innerHTML = chartSvg;
   document.body.appendChild(chartContainer);
 
-  const button = document.createElement('button');
-  button.className = 'claude-ext-button';
-  button.textContent = 'Apply Font Size';
-  button.onclick = applyFontSize;
-  document.body.appendChild(button);
+  const fontButton = document.createElement('button');
+  fontButton.className = 'claude-ext-button';
+  fontButton.textContent = 'Apply Font Size';
+  fontButton.style.right = '320px';
+  fontButton.onclick = applyFontSize;
+  document.body.appendChild(fontButton);
+
+  const renderButton = document.createElement('button');
+  renderButton.className = 'claude-ext-button';
+  renderButton.textContent = 'Render HTML';
+  renderButton.style.right = '500px';
+  renderButton.onclick = renderHTML;
+  document.body.appendChild(renderButton);
 
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
-  versionBadge.textContent = 'v.0.8.1';
+  versionBadge.textContent = 'v.0.9';
   document.body.appendChild(versionBadge);
 
-  console.log('✓ Claude HTML Renderer loaded - v.0.8.1');
+  console.log('✓ Claude HTML Renderer loaded - v.0.9');
 }
 
 injectElements();
