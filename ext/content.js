@@ -1,8 +1,30 @@
 /**
- * Claude HTML Renderer Extension v.0.6
+ * Claude HTML Renderer Extension v.0.7
  *
- * Static chart + interactive button
+ * Parse special markers from Claude responses and apply font size changes
+ * Marker format: <!-- FONT-SIZE: 24 -->
  */
+
+function applyFontSize() {
+  // Search for font size marker in the page
+  const bodyText = document.body.innerText;
+  const fontSizeMatch = bodyText.match(/FONT-SIZE:\s*(\d+)/);
+
+  if (fontSizeMatch) {
+    const fontSize = fontSizeMatch[1];
+    const style = document.createElement('style');
+    style.textContent = `
+      body, body * {
+        font-size: ${fontSize}px !important;
+      }
+    `;
+    document.head.appendChild(style);
+    console.log(`✓ Applied font size: ${fontSize}px`);
+    alert(`Font size updated to ${fontSize}px`);
+  } else {
+    alert('No FONT-SIZE marker found in page');
+  }
+}
 
 function injectElements() {
   const chartSvg = `
@@ -82,18 +104,16 @@ function injectElements() {
 
   const button = document.createElement('button');
   button.className = 'claude-ext-button';
-  button.textContent = 'Test Click';
-  button.onclick = () => {
-    alert('Button works! 🎉');
-  };
+  button.textContent = 'Apply Font Size';
+  button.onclick = applyFontSize;
   document.body.appendChild(button);
 
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
-  versionBadge.textContent = 'v.0.6';
+  versionBadge.textContent = 'v.0.7';
   document.body.appendChild(versionBadge);
 
-  console.log('✓ Claude HTML Renderer loaded - v.0.6 (chart + button)');
+  console.log('✓ Claude HTML Renderer loaded - v.0.7 (parses FONT-SIZE marker)');
 }
 
 injectElements();

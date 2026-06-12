@@ -147,6 +147,6 @@ zip -r ../claude-html-renderer.zip .
 
 **Last Updated**: 2026-06-12  
 **Current Branch**: `claude/funny-cray-ydbigy`  
-**Current Version**: v.0.6  
+**Current Version**: v.0.7  
 **Versioning**: v.X.Y.Z (X=major, Y=features, Z=patches/small changes)  
-**Status**: Interactive elements - added button to test interactivity (no observers)
+**Status**: Marker parsing - Claude outputs FONT-SIZE marker, extension applies it (no observers)
