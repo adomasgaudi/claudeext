@@ -1,10 +1,10 @@
 /**
- * Claude HTML Renderer Extension v.0.5
+ * Claude HTML Renderer Extension v.0.6
  *
- * Static SVG chart injection (no observers, no dynamic features)
+ * Static chart + interactive button
  */
 
-function injectChart() {
+function injectElements() {
   const chartSvg = `
     <svg width="280" height="180" viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
       <rect width="280" height="180" fill="#f9fafb"/>
@@ -36,6 +36,28 @@ function injectChart() {
       font-size: 12px;
     }
 
+    .claude-ext-button {
+      position: fixed;
+      top: 20px;
+      right: 320px;
+      background: #667eea;
+      color: white;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      z-index: 9998;
+      transition: background 0.2s;
+    }
+
+    .claude-ext-button:hover {
+      background: #764ba2;
+    }
+
     .claude-ext-version {
       position: fixed;
       bottom: 20px;
@@ -58,12 +80,20 @@ function injectChart() {
   chartContainer.innerHTML = chartSvg;
   document.body.appendChild(chartContainer);
 
+  const button = document.createElement('button');
+  button.className = 'claude-ext-button';
+  button.textContent = 'Test Click';
+  button.onclick = () => {
+    alert('Button works! 🎉');
+  };
+  document.body.appendChild(button);
+
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
-  versionBadge.textContent = 'v.0.5';
+  versionBadge.textContent = 'v.0.6';
   document.body.appendChild(versionBadge);
 
-  console.log('✓ Claude HTML Renderer loaded - v.0.5 (static chart)');
+  console.log('✓ Claude HTML Renderer loaded - v.0.6 (chart + button)');
 }
 
-injectChart();
+injectElements();

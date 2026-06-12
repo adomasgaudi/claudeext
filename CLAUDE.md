@@ -147,6 +147,6 @@ zip -r ../claude-html-renderer.zip .
 
 **Last Updated**: 2026-06-12  
 **Current Branch**: `claude/funny-cray-ydbigy`  
-**Current Version**: v.0.5  
+**Current Version**: v.0.6  
 **Versioning**: v.X.Y.Z (X=major, Y=features, Z=patches/small changes)  
-**Status**: Static chart injection working - badge + SVG chart (no observers)
+**Status**: Interactive elements - added button to test interactivity (no observers)
