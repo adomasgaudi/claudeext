@@ -1,10 +1,10 @@
 /**
- * Claude HTML Renderer Extension v.0.10
+ * Claude HTML Renderer Extension v.0.11
  *
+ * 1/10th debugging: Just show extracted content, no rendering yet
  * Parse special markers from Claude responses:
  * - Font size: <!-- FONT-SIZE: 24 -->
  * - Render HTML: <!-- RENDER-HTML --> <button>Click</button>
- * Fixed: Better HTML extraction from entity-encoded content
  */
 
 function applyFontSize() {
@@ -36,82 +36,19 @@ function applyFontSize() {
 }
 
 function renderHTML() {
-  // Search for RENDER-HTML marker in page HTML (to find exact location)
-  const bodyHTML = document.body.innerHTML;
-  const markerHTML = '&lt;!-- RENDER-HTML --&gt;';
-  const markerIndex = bodyHTML.indexOf(markerHTML);
+  // 1/10th effort: Just find and show what's there, no rendering yet
+  const bodyText = document.body.innerText;
+  const markerIndex = bodyText.indexOf('<!-- RENDER-HTML -->');
 
   if (markerIndex === -1) {
-    alert('No RENDER-HTML marker found in page');
+    alert('❌ No marker found');
     return;
   }
 
-  // Found marker in HTML, extract everything after it
-  let htmlAfterMarker = bodyHTML.substring(markerIndex + markerHTML.length);
-
-  // Extract content until next marker, closing tag, or 2000 chars
-  let extractedHTML = '';
-  let braceCount = 0;
-  let inTag = false;
-
-  for (let i = 0; i < Math.min(htmlAfterMarker.length, 2000); i++) {
-    let char = htmlAfterMarker[i];
-
-    // Look for HTML-like content
-    if (char === '&' && htmlAfterMarker.substring(i, i + 4) === '&lt;') {
-      extractedHTML += char;
-      inTag = true;
-    } else if (inTag && char === ';' && htmlAfterMarker.substring(i - 2, i + 1) === 't;') {
-      extractedHTML += char;
-      // Check if this closes a tag
-      if (htmlAfterMarker.substring(i - 3, i + 1) === 'gt;') {
-        inTag = false;
-        // Continue a bit more to catch content
-        let j = i + 1;
-        let nextChars = htmlAfterMarker.substring(j, j + 100);
-        // Stop if we hit a paragraph or new marker
-        if (nextChars.includes('&lt;!--') || nextChars.includes('&lt;/')) {
-          break;
-        }
-      }
-    } else if (inTag || (char === '&' && htmlAfterMarker.substring(i).startsWith('&lt;'))) {
-      extractedHTML += char;
-    }
-  }
-
-  // Decode HTML entities
-  const textarea = document.createElement('textarea');
-  textarea.innerHTML = extractedHTML;
-  const decodedHTML = textarea.value;
-
-  if (!decodedHTML || decodedHTML.length < 5) {
-    alert('Found marker but could not extract HTML content');
-    console.log('Extracted (raw):', extractedHTML.substring(0, 100));
-    return;
-  }
-
-  // Create container for rendered HTML
-  const container = document.createElement('div');
-  container.className = 'claude-ext-html-render';
-
-  try {
-    container.innerHTML = decodedHTML;
-  } catch (e) {
-    alert('Error rendering HTML: ' + e.message);
-    console.error('Render error:', e, 'Content:', decodedHTML);
-    return;
-  }
-
-  // Replace or insert
-  const existingRender = document.querySelector('.claude-ext-html-render');
-  if (existingRender) {
-    existingRender.replaceWith(container);
-  } else {
-    document.body.insertBefore(container, document.body.firstChild);
-  }
-
-  console.log('✓ Rendered HTML:', decodedHTML.substring(0, 100));
-  alert('HTML rendered on page!');
+  // Get text after marker (first 200 chars)
+  const afterMarker = bodyText.substring(markerIndex + 21, markerIndex + 221);
+  console.log('📍 Found marker. Content after marker:', afterMarker);
+  alert('✓ Marker found!\n\nContent preview:\n' + afterMarker.substring(0, 100));
 }
 
 function injectElements() {
@@ -219,10 +156,10 @@ function injectElements() {
 
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
-  versionBadge.textContent = 'v.0.10';
+  versionBadge.textContent = 'v.0.11';
   document.body.appendChild(versionBadge);
 
-  console.log('✓ Claude HTML Renderer loaded - v.0.10');
+  console.log('✓ Claude HTML Renderer loaded - v.0.11');
 }
 
 injectElements();
