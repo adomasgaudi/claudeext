@@ -1,9 +1,9 @@
 /**
- * Claude HTML Renderer Extension v.0.18
+ * Claude HTML Renderer Extension v.0.19
  *
- * Live token counter in Claude UI + session token badge:
+ * Live token tracking: session, last prompt, last 10 average:
  * 1. Level 3 (Learn): debugCodeBlocks() - understand DOM structure
- * 2. Level 2 (Parallel): Input token counter + session badge, cost calculator
+ * 2. Level 2 (Parallel): Token tracking, input counter, prompt history
  * 3. Level 1 (Safe): Enhanced popup, token display, cost calculator
  * Parse special markers from Claude responses:
  * - Font size: <!-- FONT-SIZE: 24 -->
@@ -105,7 +105,7 @@ function renderHTML() {
   }
 }
 
-function updateSessionTokenBadge(badge) {
+function updateSessionTokenBadge(badge, state) {
   // Get session token count from page analysis
   const allText = document.body.innerText;
 
@@ -113,8 +113,25 @@ function updateSessionTokenBadge(badge) {
   const wordCount = allText.split(/\s+/).length;
   const estimatedSessionTokens = Math.ceil(wordCount * 1.3);
 
-  // Update badge: v.0.18 | 47,560 tokens
-  badge.textContent = `v.0.18 | ${estimatedSessionTokens.toLocaleString()} tokens`;
+  // Calculate tokens added since last update (this prompt)
+  const lastPromptTokens = estimatedSessionTokens - state.previousTotal;
+  state.previousTotal = estimatedSessionTokens;
+
+  // Track last 10 prompt token counts
+  if (lastPromptTokens > 5) { // Only count significant changes (>5 tokens)
+    state.promptHistory.push(lastPromptTokens);
+    if (state.promptHistory.length > 10) {
+      state.promptHistory.shift(); // Remove oldest if more than 10
+    }
+  }
+
+  // Calculate average of last 10 prompts
+  const avgLast10 = state.promptHistory.length > 0
+    ? Math.round(state.promptHistory.reduce((a, b) => a + b, 0) / state.promptHistory.length)
+    : 0;
+
+  // Update badge: v.0.19 | Session: 50,720 | Last: 380 | Avg(10): 285
+  badge.textContent = `v.0.19 | Session: ${estimatedSessionTokens.toLocaleString()} | Last: ${lastPromptTokens} | Avg(10): ${avgLast10}`;
 }
 
 function setupTokenCounter() {
@@ -299,15 +316,15 @@ function injectElements() {
       color: white;
       padding: 8px 16px;
       border-radius: 6px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-size: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", monospace;
+      font-size: 11px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
       z-index: 10000;
-      font-weight: 600;
+      font-weight: 500;
       white-space: nowrap;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      max-width: 400px;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .claude-ext-html-render {
@@ -365,11 +382,17 @@ function injectElements() {
   versionBadge.className = 'claude-ext-version';
   document.body.appendChild(versionBadge);
 
-  console.log('✓ Claude HTML Renderer loaded - v.0.18');
+  // Track token state across updates
+  const tokenState = {
+    previousTotal: 0,
+    promptHistory: [] // Last 10 prompt token counts
+  };
+
+  console.log('✓ Claude HTML Renderer loaded - v.0.19');
 
   // Update badge immediately and every 2 seconds
-  updateSessionTokenBadge(versionBadge);
-  setInterval(() => updateSessionTokenBadge(versionBadge), 2000);
+  updateSessionTokenBadge(versionBadge, tokenState);
+  setInterval(() => updateSessionTokenBadge(versionBadge, tokenState), 2000);
 
   // Level 2: Token counter for input
   setupTokenCounter();
