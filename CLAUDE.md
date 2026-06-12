@@ -137,6 +137,6 @@ zip -r ../claude-html-renderer.zip .
 
 **Last Updated**: 2026-06-12  
 **Current Branch**: `claude/funny-cray-ydbigy`  
-**Current Version**: v.0.4.2  
+**Current Version**: v.0.4.3  
 **Versioning**: v.X.Y.Z (X=major, Y=features, Z=patches/small changes)  
-**Status**: Debugging progression - v.0.4.1 (1/10th) works, now testing v.0.4.2 (2/10ths)
+**Status**: Debugging DOM selectors - yellow styling not applying, added console logging to identify correct selectors

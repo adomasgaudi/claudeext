@@ -1,17 +1,20 @@
 /**
- * Claude HTML Renderer Extension v.0.4.2
+ * Claude HTML Renderer Extension v.0.4.3
  *
  * 2/10ths effort: Version badge + yellow styling on Claude responses
+ * Debugging: Added broader selectors and console logging
  */
 
 function injectElements() {
   const style = document.createElement('style');
   style.textContent = `
-    /* Claude response styling */
-    [data-message-role="assistant"],
-    [data-role="assistant"],
-    .message.assistant,
-    .response {
+    /* Claude response styling - broader selectors */
+    [data-message-role="assistant"] *,
+    [data-role="assistant"] *,
+    .message.assistant *,
+    .assistant-message *,
+    [class*="assistant"] *,
+    [class*="response"] * {
       color: yellow !important;
     }
 
@@ -34,9 +37,19 @@ function injectElements() {
 
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
-  versionBadge.textContent = 'v.0.4.2';
+  versionBadge.textContent = 'v.0.4.3';
   document.body.appendChild(versionBadge);
+
+  // Debug: log DOM structure to help identify correct selectors
+  console.log('✓ Claude HTML Renderer loaded - v.0.4.3');
+  console.log('Searching for message containers...');
+  const allDivs = document.querySelectorAll('[class*="message"], [class*="response"], [data-role], [data-message-role]');
+  console.log(`Found ${allDivs.length} potential message elements`);
+  if (allDivs.length > 0) {
+    console.log('First element:', allDivs[0]);
+    console.log('Classes:', allDivs[0].className);
+    console.log('Attributes:', Array.from(allDivs[0].attributes).map(a => `${a.name}="${a.value}"`).join(', '));
+  }
 }
 
 injectElements();
-console.log('✓ Claude HTML Renderer loaded - v.0.4.2');
