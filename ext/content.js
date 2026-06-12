@@ -1,9 +1,10 @@
 /**
- * Claude HTML Renderer Extension v.0.9.1
+ * Claude HTML Renderer Extension v.0.9.2
  *
  * Parse special markers from Claude responses:
  * - Font size: <!-- FONT-SIZE: 24 -->
  * - Render HTML: <!-- RENDER-HTML --> <button>Click</button>
+ * Fixed: Decode HTML entities from text content
  */
 
 function applyFontSize() {
@@ -35,34 +36,47 @@ function applyFontSize() {
 }
 
 function renderHTML() {
-  // Search for RENDER-HTML marker in text content
+  // Search for RENDER-HTML marker in page text
   const bodyText = document.body.innerText;
   const markerIndex = bodyText.indexOf('<!-- RENDER-HTML -->');
 
   if (markerIndex !== -1) {
-    // Found marker, now search in HTML for the actual content
+    // Found marker, extract everything after it until next comment or end
+    let textAfterMarker = bodyText.substring(markerIndex + '<!-- RENDER-HTML -->'.length);
+
+    // Extract lines until we hit another marker or end
+    let lines = textAfterMarker.split('\n');
     let htmlContent = '';
 
-    // Find all code blocks and search for the marker
-    const codeBlocks = document.querySelectorAll('pre code, code');
-    for (let block of codeBlocks) {
-      if (block.innerText.includes('<!-- RENDER-HTML -->')) {
-        // Extract content after marker
-        let text = block.innerText;
-        let contentStart = text.indexOf('<!-- RENDER-HTML -->') + '<!-- RENDER-HTML -->'.length;
-        htmlContent = text.substring(contentStart).trim();
-
-        // Remove comment end if present
-        htmlContent = htmlContent.replace(/-->/g, '').trim();
-        break;
-      }
+    for (let line of lines) {
+      // Stop at next comment
+      if (line.includes('<!--')) break;
+      // Skip empty lines at start
+      if (!htmlContent && !line.trim()) continue;
+      htmlContent += line + '\n';
     }
 
+    htmlContent = htmlContent.trim();
+
     if (htmlContent) {
+      // Decode HTML entities that appear in the text
+      const parser = new DOMParser();
+      const decoded = parser.parseFromString(htmlContent, 'text/html').documentElement.textContent;
+
+      // Actually, let's just use a simple entity decoder
+      const textarea = document.createElement('textarea');
+      textarea.innerHTML = htmlContent;
+      const decodedHTML = textarea.value;
+
       // Create container for rendered HTML
       const container = document.createElement('div');
       container.className = 'claude-ext-html-render';
-      container.innerHTML = htmlContent;
+      try {
+        container.innerHTML = decodedHTML;
+      } catch (e) {
+        // If that fails, try the original
+        container.innerHTML = htmlContent;
+      }
 
       // Replace or insert
       const existingRender = document.querySelector('.claude-ext-html-render');
@@ -72,10 +86,10 @@ function renderHTML() {
         document.body.insertBefore(container, document.body.firstChild);
       }
 
-      console.log('✓ Rendered HTML:', htmlContent.substring(0, 50) + '...');
+      console.log('✓ Rendered HTML:', decodedHTML.substring(0, 50) + '...');
       alert('HTML rendered on page!');
     } else {
-      alert('Found marker but no HTML content');
+      alert('Found marker but no HTML content after it');
     }
   } else {
     alert('No RENDER-HTML marker found in page');
@@ -187,10 +201,10 @@ function injectElements() {
 
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
-  versionBadge.textContent = 'v.0.9.1';
+  versionBadge.textContent = 'v.0.9.2';
   document.body.appendChild(versionBadge);
 
-  console.log('✓ Claude HTML Renderer loaded - v.0.9.1');
+  console.log('✓ Claude HTML Renderer loaded - v.0.9.2');
 }
 
 injectElements();
