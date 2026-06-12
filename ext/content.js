@@ -1,7 +1,7 @@
 /**
- * Claude HTML Renderer Extension v.0.12
+ * Claude HTML Renderer Extension v.0.13
  *
- * 2/10ths: Extract HTML and try rendering
+ * 4/10ths: Robust HTML extraction and rendering
  * Parse special markers from Claude responses:
  * - Font size: <!-- FONT-SIZE: 24 -->
  * - Render HTML: <!-- RENDER-HTML --> <button>Click</button>
@@ -36,7 +36,7 @@ function applyFontSize() {
 }
 
 function renderHTML() {
-  // 2/10ths: Extract full HTML and try rendering
+  // 4/10ths: Robust HTML extraction and rendering with better handling
   const bodyText = document.body.innerText;
   const markerIndex = bodyText.indexOf('<!-- RENDER-HTML -->');
 
@@ -45,19 +45,36 @@ function renderHTML() {
     return;
   }
 
-  // Extract everything after marker until we hit a line that doesn't look like HTML
+  // Extract everything after marker until next marker or end of content
   const afterMarker = bodyText.substring(markerIndex + 21);
-  const lines = afterMarker.split('\n');
+  const nextMarkerIndex = afterMarker.indexOf('<!--');
+  let potentialContent = nextMarkerIndex > 0
+    ? afterMarker.substring(0, nextMarkerIndex)
+    : afterMarker;
 
+  const lines = potentialContent.split('\n');
   let htmlContent = '';
+  let collectingHTML = false;
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
-    if (!line) continue; // Skip empty lines
-    if (line.startsWith('<!--') && i > 0) break; // Stop at next comment
-    if (line.startsWith('<') || htmlContent) {
+
+    // Start collecting once we see an opening tag
+    if (line.startsWith('<')) {
+      collectingHTML = true;
+    }
+
+    if (collectingHTML) {
       htmlContent += line + '\n';
-      if (line.endsWith('>') && htmlContent.includes('<') && htmlContent.includes('</')) {
-        break; // Found complete tag
+
+      // Stop if we see a complete closing tag (basic heuristic)
+      if (line.includes('</') && line.includes('>')) {
+        // Check if this looks like a complete document
+        const openCount = (htmlContent.match(/</g) || []).length;
+        const closeCount = (htmlContent.match(/>/g) || []).length;
+        if (openCount > 0 && closeCount > 0 && openCount === closeCount) {
+          break;
+        }
       }
     }
   }
@@ -81,8 +98,9 @@ function renderHTML() {
     if (existingRender) {
       existingRender.replaceWith(container);
     } else {
-      document.body.insertBefore(container, document.body.firstChild);
+      document.body.appendChild(container);
     }
+    console.log('✓ HTML rendered!');
     alert('✓ HTML rendered!');
   } catch (e) {
     alert('❌ Render error: ' + e.message);
@@ -195,10 +213,10 @@ function injectElements() {
 
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
-  versionBadge.textContent = 'v.0.12';
+  versionBadge.textContent = 'v.0.13';
   document.body.appendChild(versionBadge);
 
-  console.log('✓ Claude HTML Renderer loaded - v.0.12');
+  console.log('✓ Claude HTML Renderer loaded - v.0.13');
 }
 
 injectElements();
