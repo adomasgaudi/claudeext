@@ -60,8 +60,15 @@ Example output:
    - Version in main README (if applicable)
    - Any version references in scripts or config
 3. **Commit** with clear, descriptive messages
-4. **Push** with `git push -u origin claude/funny-cray-ydbigy`
-5. **Merge/publish** — package and publish the extension when ready
+4. **Push to dev branch** with `git push -u origin claude/funny-cray-ydbigy`
+5. **Merge to main** — when feature is complete, merge the dev branch into `main`
+6. **Deploy** — push to `main` for live deployment
+
+### Main Branch Strategy
+- **`main`** = production branch (always deployable)
+- **`claude/funny-cray-ydbigy`** = development branch
+- **Workflow**: Develop → Commit → Push to dev → Merge to main → Deploy
+- All releases and live changes go through `main` branch only
 
 ### Git Push
 - Use `git push -u origin <branch-name>` for first push
