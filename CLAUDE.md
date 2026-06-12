@@ -112,6 +112,18 @@ zip -r ../claude-html-renderer.zip .
 
 **Don't repeat broken approaches** — If something failed (MutationObserver, dynamic updates), don't try it again unless we know it works in isolation first.
 
+**Extension is making Claude lag** — Keep performance in mind. Avoid:
+- Heavy DOM queries
+- Complex CSS selectors
+- Unnecessary DOM manipulations
+- Global event listeners
+
+**Versioning: 2 digits ONLY** (#remember)
+- Format: v.X.Y (e.g., v.0.9, v.0.10, v.0.11)
+- NO patch versions (no v.0.9.1, v.0.9.2, etc.)
+- Always increment the 2nd digit: v.0.9 → v.0.10 → v.0.11
+- Never go backwards or skip versions
+
 ## Debugging Methodology (#debug #remember)
 
 **1/10th approach is ONLY for broken features, not for building known-good ones**
