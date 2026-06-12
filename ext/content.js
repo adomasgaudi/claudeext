@@ -1,7 +1,7 @@
 /**
- * Claude HTML Renderer Extension v.0.20
+ * Claude HTML Renderer Extension v.0.21
  *
- * Token tracking with model display and selective bolding:
+ * Collapsible token badge + inline-styled model name:
  * 1. Level 3 (Learn): debugCodeBlocks() - understand DOM structure
  * 2. Level 2 (Parallel): Token tracking, input counter, prompt history
  * 3. Level 1 (Safe): Enhanced popup, token display, cost calculator
@@ -137,10 +137,18 @@ function updateSessionTokenBadge(badge, state) {
 
   // Extract just the model family (e.g., "Haiku" from "Haiku 4.5")
   const modelFamily = modelName.split(' ')[0];
+  const modelVersion = modelName.slice(modelFamily.length).trim();
 
-  // Update badge with HTML formatting (bold only the model family)
-  // v.0.20 | Session: 50,720 | Last: 380 | Avg(10): 285 | <b>Haiku</b> 4.5
-  badge.innerHTML = `v.0.20 | Session: ${estimatedSessionTokens.toLocaleString()} | Last: ${lastPromptTokens} | Avg(10): ${avgLast10} | <b>${modelFamily}</b> ${modelName.slice(modelFamily.length).trim()}`;
+  // Inline styles so the page's @layer CSS can't override the bold
+  const modelHtml = `<span style="font-weight:800 !important; font-size:13px; letter-spacing:0.3px;">${modelFamily}</span> ${modelVersion}`;
+
+  if (state.collapsed) {
+    // Collapsed: just version + model
+    badge.innerHTML = `v.0.21 | ${modelHtml} <span style="opacity:0.7;">▸</span>`;
+  } else {
+    // Expanded: full metrics
+    badge.innerHTML = `v.0.21 | Session: ${estimatedSessionTokens.toLocaleString()} | Last: ${lastPromptTokens} | Avg(10): ${avgLast10} | ${modelHtml} <span style="opacity:0.7;">▾</span>`;
+  }
 }
 
 function setupTokenCounter() {
@@ -393,15 +401,24 @@ function injectElements() {
 
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
+  versionBadge.style.cursor = 'pointer';
+  versionBadge.title = 'Click to collapse/expand';
   document.body.appendChild(versionBadge);
 
   // Track token state across updates
   const tokenState = {
     previousTotal: 0,
-    promptHistory: [] // Last 10 prompt token counts
+    promptHistory: [], // Last 10 prompt token counts
+    collapsed: false
   };
 
-  console.log('✓ Claude HTML Renderer loaded - v.0.20');
+  // Click badge to toggle collapsed/expanded
+  versionBadge.onclick = () => {
+    tokenState.collapsed = !tokenState.collapsed;
+    updateSessionTokenBadge(versionBadge, tokenState);
+  };
+
+  console.log('✓ Claude HTML Renderer loaded - v.0.21');
 
   // Update badge immediately and every 2 seconds
   updateSessionTokenBadge(versionBadge, tokenState);
