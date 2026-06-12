@@ -1,9 +1,9 @@
 /**
- * Claude HTML Renderer Extension v.0.16
+ * Claude HTML Renderer Extension v.0.17
  *
- * Token cost tracking + three-level work strategy:
+ * Live token counter in Claude UI + cost tracking:
  * 1. Level 3 (Learn): debugCodeBlocks() - understand DOM structure
- * 2. Level 2 (Parallel): Token tracking, debug info button
+ * 2. Level 2 (Parallel): Input token counter, cost calculator
  * 3. Level 1 (Safe): Enhanced popup, token display, cost calculator
  * Parse special markers from Claude responses:
  * - Font size: <!-- FONT-SIZE: 24 -->
@@ -103,6 +103,95 @@ function renderHTML() {
     alert('❌ Render error: ' + e.message);
     console.error('Error:', e);
   }
+}
+
+function setupTokenCounter() {
+  // Level 2: Live token counter for Claude input
+  const style = document.createElement('style');
+  style.textContent = `
+    .claude-ext-token-counter {
+      position: absolute;
+      bottom: -30px;
+      left: 0;
+      font-size: 12px;
+      color: #667eea;
+      font-weight: 500;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    .claude-ext-token-counter.hidden {
+      display: none;
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Find Claude's input element (try multiple selectors)
+  const inputSelectors = [
+    'textarea[class*="input"]',
+    'textarea[placeholder*="Message"]',
+    'textarea[data-testid*="input"]',
+    '[contenteditable="true"]',
+    'textarea'
+  ];
+
+  let inputElement = null;
+  for (const selector of inputSelectors) {
+    const element = document.querySelector(selector);
+    if (element && element.offsetParent !== null) {
+      inputElement = element;
+      break;
+    }
+  }
+
+  if (!inputElement) {
+    console.log('⚠️ Claude input element not found. Token counter disabled.');
+    return;
+  }
+
+  console.log('✓ Found Claude input element:', inputElement.tagName);
+
+  // Create token counter display
+  const counter = document.createElement('div');
+  counter.className = 'claude-ext-token-counter hidden';
+  inputElement.parentElement.style.position = 'relative';
+  inputElement.parentElement.appendChild(counter);
+
+  // Haiku pricing: $0.80/$2.40 per million tokens
+  const INPUT_COST = 0.80 / 1000000;
+  const OUTPUT_COST = 2.40 / 1000000;
+
+  function updateTokenCount() {
+    const text = inputElement.value || inputElement.innerText || inputElement.textContent || '';
+    if (!text.trim()) {
+      counter.classList.add('hidden');
+      return;
+    }
+
+    // Estimate tokens: ~1.3 tokens per word
+    const wordCount = text.trim().split(/\s+/).length;
+    const estimatedTokens = Math.ceil(wordCount * 1.3);
+
+    // Calculate cost (estimate as 50/50 input/output)
+    const inputTokens = Math.ceil(estimatedTokens * 0.5);
+    const outputTokens = Math.ceil(estimatedTokens * 0.5);
+    const cost = (inputTokens * INPUT_COST) + (outputTokens * OUTPUT_COST);
+
+    counter.textContent = `📊 Tokens: ${estimatedTokens} (~$${cost.toFixed(4)})`;
+    counter.classList.remove('hidden');
+  }
+
+  // Listen for input changes
+  inputElement.addEventListener('input', updateTokenCount);
+  inputElement.addEventListener('change', updateTokenCount);
+  inputElement.addEventListener('keyup', updateTokenCount);
+
+  // Also check periodically for contenteditable changes
+  if (inputElement.contentEditable === 'true') {
+    setInterval(updateTokenCount, 500);
+  }
+
+  console.log('✓ Token counter installed');
 }
 
 function debugCodeBlocks() {
@@ -258,10 +347,13 @@ function injectElements() {
 
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
-  versionBadge.textContent = 'v.0.16';
+  versionBadge.textContent = 'v.0.17';
   document.body.appendChild(versionBadge);
 
-  console.log('✓ Claude HTML Renderer loaded - v.0.16');
+  console.log('✓ Claude HTML Renderer loaded - v.0.17');
+
+  // Level 2: Token counter for input
+  setupTokenCounter();
 
   // Level 3: Debug the DOM structure
   debugCodeBlocks();
