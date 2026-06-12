@@ -1,10 +1,10 @@
 /**
- * Claude HTML Renderer Extension v.0.9.2
+ * Claude HTML Renderer Extension v.0.10
  *
  * Parse special markers from Claude responses:
  * - Font size: <!-- FONT-SIZE: 24 -->
  * - Render HTML: <!-- RENDER-HTML --> <button>Click</button>
- * Fixed: Decode HTML entities from text content
+ * Fixed: Better HTML extraction from entity-encoded content
  */
 
 function applyFontSize() {
@@ -36,64 +36,82 @@ function applyFontSize() {
 }
 
 function renderHTML() {
-  // Search for RENDER-HTML marker in page text
-  const bodyText = document.body.innerText;
-  const markerIndex = bodyText.indexOf('<!-- RENDER-HTML -->');
+  // Search for RENDER-HTML marker in page HTML (to find exact location)
+  const bodyHTML = document.body.innerHTML;
+  const markerHTML = '&lt;!-- RENDER-HTML --&gt;';
+  const markerIndex = bodyHTML.indexOf(markerHTML);
 
-  if (markerIndex !== -1) {
-    // Found marker, extract everything after it until next comment or end
-    let textAfterMarker = bodyText.substring(markerIndex + '<!-- RENDER-HTML -->'.length);
-
-    // Extract lines until we hit another marker or end
-    let lines = textAfterMarker.split('\n');
-    let htmlContent = '';
-
-    for (let line of lines) {
-      // Stop at next comment
-      if (line.includes('<!--')) break;
-      // Skip empty lines at start
-      if (!htmlContent && !line.trim()) continue;
-      htmlContent += line + '\n';
-    }
-
-    htmlContent = htmlContent.trim();
-
-    if (htmlContent) {
-      // Decode HTML entities that appear in the text
-      const parser = new DOMParser();
-      const decoded = parser.parseFromString(htmlContent, 'text/html').documentElement.textContent;
-
-      // Actually, let's just use a simple entity decoder
-      const textarea = document.createElement('textarea');
-      textarea.innerHTML = htmlContent;
-      const decodedHTML = textarea.value;
-
-      // Create container for rendered HTML
-      const container = document.createElement('div');
-      container.className = 'claude-ext-html-render';
-      try {
-        container.innerHTML = decodedHTML;
-      } catch (e) {
-        // If that fails, try the original
-        container.innerHTML = htmlContent;
-      }
-
-      // Replace or insert
-      const existingRender = document.querySelector('.claude-ext-html-render');
-      if (existingRender) {
-        existingRender.replaceWith(container);
-      } else {
-        document.body.insertBefore(container, document.body.firstChild);
-      }
-
-      console.log('✓ Rendered HTML:', decodedHTML.substring(0, 50) + '...');
-      alert('HTML rendered on page!');
-    } else {
-      alert('Found marker but no HTML content after it');
-    }
-  } else {
+  if (markerIndex === -1) {
     alert('No RENDER-HTML marker found in page');
+    return;
   }
+
+  // Found marker in HTML, extract everything after it
+  let htmlAfterMarker = bodyHTML.substring(markerIndex + markerHTML.length);
+
+  // Extract content until next marker, closing tag, or 2000 chars
+  let extractedHTML = '';
+  let braceCount = 0;
+  let inTag = false;
+
+  for (let i = 0; i < Math.min(htmlAfterMarker.length, 2000); i++) {
+    let char = htmlAfterMarker[i];
+
+    // Look for HTML-like content
+    if (char === '&' && htmlAfterMarker.substring(i, i + 4) === '&lt;') {
+      extractedHTML += char;
+      inTag = true;
+    } else if (inTag && char === ';' && htmlAfterMarker.substring(i - 2, i + 1) === 't;') {
+      extractedHTML += char;
+      // Check if this closes a tag
+      if (htmlAfterMarker.substring(i - 3, i + 1) === 'gt;') {
+        inTag = false;
+        // Continue a bit more to catch content
+        let j = i + 1;
+        let nextChars = htmlAfterMarker.substring(j, j + 100);
+        // Stop if we hit a paragraph or new marker
+        if (nextChars.includes('&lt;!--') || nextChars.includes('&lt;/')) {
+          break;
+        }
+      }
+    } else if (inTag || (char === '&' && htmlAfterMarker.substring(i).startsWith('&lt;'))) {
+      extractedHTML += char;
+    }
+  }
+
+  // Decode HTML entities
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = extractedHTML;
+  const decodedHTML = textarea.value;
+
+  if (!decodedHTML || decodedHTML.length < 5) {
+    alert('Found marker but could not extract HTML content');
+    console.log('Extracted (raw):', extractedHTML.substring(0, 100));
+    return;
+  }
+
+  // Create container for rendered HTML
+  const container = document.createElement('div');
+  container.className = 'claude-ext-html-render';
+
+  try {
+    container.innerHTML = decodedHTML;
+  } catch (e) {
+    alert('Error rendering HTML: ' + e.message);
+    console.error('Render error:', e, 'Content:', decodedHTML);
+    return;
+  }
+
+  // Replace or insert
+  const existingRender = document.querySelector('.claude-ext-html-render');
+  if (existingRender) {
+    existingRender.replaceWith(container);
+  } else {
+    document.body.insertBefore(container, document.body.firstChild);
+  }
+
+  console.log('✓ Rendered HTML:', decodedHTML.substring(0, 100));
+  alert('HTML rendered on page!');
 }
 
 function injectElements() {
@@ -201,10 +219,10 @@ function injectElements() {
 
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
-  versionBadge.textContent = 'v.0.9.2';
+  versionBadge.textContent = 'v.0.10';
   document.body.appendChild(versionBadge);
 
-  console.log('✓ Claude HTML Renderer loaded - v.0.9.2');
+  console.log('✓ Claude HTML Renderer loaded - v.0.10');
 }
 
 injectElements();

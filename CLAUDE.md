@@ -159,6 +159,6 @@ zip -r ../claude-html-renderer.zip .
 
 **Last Updated**: 2026-06-12  
 **Current Branch**: `claude/funny-cray-ydbigy`  
-**Current Version**: v.0.9.2  
-**Versioning**: v.X.Y.Z (X=major, Y=features, Z=patches/small changes)  
-**Status**: Fixed HTML entity decoding - handles &lt; and &gt; from markdown rendering
+**Current Version**: v.0.10  
+**Versioning**: v.X.Y (2 digits only - v.0.10, v.0.11, etc.)  
+**Status**: Better HTML extraction - improved entity-encoded content parsing

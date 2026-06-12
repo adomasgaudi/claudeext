@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Claude HTML Renderer",
   "description": "Render HTML code blocks in Claude chat",
-  "version": "0.9.2",
+  "version": "0.10",
   "permissions": ["scripting"],
   "host_permissions": ["*://claude.ai/*", "*://www.anthropic.com/*"],
   "action": {
