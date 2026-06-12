@@ -1,8 +1,8 @@
 {
   "statusLine": {
     "type": "command",
-    "command": "/home/user/claudeext/.claude/token-cost-calculator.sh --status",
-    "refreshInterval": 2
+    "command": "python3 /home/user/claudeext/scripts/show-cost.py",
+    "refreshInterval": 5
   },
   "hooks": {
     "Stop": [
@@ -11,7 +11,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/home/user/claudeext/.claude/token-cost-calculator.sh"
+            "command": "python3 /home/user/claudeext/scripts/show-cost.py"
           }
         ]
       }
