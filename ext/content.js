@@ -1,9 +1,9 @@
 /**
- * Claude HTML Renderer Extension v.0.17
+ * Claude HTML Renderer Extension v.0.18
  *
- * Live token counter in Claude UI + cost tracking:
+ * Live token counter in Claude UI + session token badge:
  * 1. Level 3 (Learn): debugCodeBlocks() - understand DOM structure
- * 2. Level 2 (Parallel): Input token counter, cost calculator
+ * 2. Level 2 (Parallel): Input token counter + session badge, cost calculator
  * 3. Level 1 (Safe): Enhanced popup, token display, cost calculator
  * Parse special markers from Claude responses:
  * - Font size: <!-- FONT-SIZE: 24 -->
@@ -103,6 +103,18 @@ function renderHTML() {
     alert('❌ Render error: ' + e.message);
     console.error('Error:', e);
   }
+}
+
+function updateSessionTokenBadge(badge) {
+  // Get session token count from page analysis
+  const allText = document.body.innerText;
+
+  // Rough estimate: count all visible text on page
+  const wordCount = allText.split(/\s+/).length;
+  const estimatedSessionTokens = Math.ceil(wordCount * 1.3);
+
+  // Update badge: v.0.18 | 47,560 tokens
+  badge.textContent = `v.0.18 | ${estimatedSessionTokens.toLocaleString()} tokens`;
 }
 
 function setupTokenCounter() {
@@ -285,13 +297,17 @@ function injectElements() {
       right: 20px;
       background: #667eea;
       color: white;
-      padding: 6px 12px;
+      padding: 8px 16px;
       border-radius: 6px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       font-size: 12px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
       z-index: 10000;
       font-weight: 600;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .claude-ext-html-render {
@@ -347,10 +363,13 @@ function injectElements() {
 
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
-  versionBadge.textContent = 'v.0.17';
   document.body.appendChild(versionBadge);
 
-  console.log('✓ Claude HTML Renderer loaded - v.0.17');
+  console.log('✓ Claude HTML Renderer loaded - v.0.18');
+
+  // Update badge immediately and every 2 seconds
+  updateSessionTokenBadge(versionBadge);
+  setInterval(() => updateSessionTokenBadge(versionBadge), 2000);
 
   // Level 2: Token counter for input
   setupTokenCounter();

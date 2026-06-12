@@ -247,6 +247,6 @@ When stuck on a task after 2-4 attempts: Don't keep trying fixes. Switch to Leve
 
 **Last Updated**: 2026-06-12  
 **Current Branch**: `claude/funny-cray-ydbigy`  
-**Current Version**: v.0.17  
+**Current Version**: v.0.18  
 **Versioning**: v.X.Y (2 digits only - v.0.10, v.0.11, etc.)  
-**Status**: Live token counter in Claude UI + DOM learning + cost tracking
+**Status**: Live token counter in UI + session badge + cost tracking
