@@ -1,6 +1,6 @@
 # Claude HTML Renderer Extension
 
-**Version: 1.1.0**
+**Version: 1.2.0**
 
 A browser extension that renders HTML code blocks in Claude chat as live previews.
 
@@ -33,11 +33,11 @@ For permanent Firefox installation:
 
 ## Testing
 
-**Current version (1.1.0)**: Simple test - turns all text on Claude chat red to verify the extension is active.
+**Current version (1.2.0)**: Simple test - turns all text on Claude chat blue to verify the extension is active.
 
-When you load the extension and visit claude.ai, all text should turn red. If this works, the extension is properly injected and you'll see the console message:
+When you load the extension and visit claude.ai, all text should turn blue. If this works, the extension is properly injected and you'll see the console message:
 ```
-✓ Claude HTML Renderer loaded - text turned red
+✓ Claude HTML Renderer loaded - text turned blue
 ```
 
 To check: Press `F12` → Console tab → look for the checkmark message.
@@ -86,4 +86,4 @@ The extension will:
 - **Extension not working?** Make sure Developer mode is on, and the extension is enabled in your Extensions menu
 - **Preview not showing?** Refresh the page, or click the extension icon → check if it's active
 - **Scripts not running?** Make sure the `<!-- RENDER -->` marker is on the first line of the HTML block
-- **Text not red (v1.1)?** Check console with F12 → Console, look for the checkmark message
+- **Text not blue (v1.2)?** Check console with F12 → Console, look for the checkmark message
