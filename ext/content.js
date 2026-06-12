@@ -1,8 +1,10 @@
 /**
- * Claude HTML Renderer Extension v.0.25
+ * Claude HTML Renderer Extension v.0.26
  *
- * Single feature: inline usage display next to the model name in the
- * bottom toolbar of claude.ai/code. No floating popups.
+ * Two static elements:
+ * - inline usage display (ctx/plan %) next to the model name in the
+ *   bottom toolbar of claude.ai/code — usage info only, no version
+ * - tiny fixed version label in the bottom-right corner of the page
  *
  * Data sources (REAL, scraped from Claude's own UI — see HANDOFF.md §4):
  * - button[aria-label^="Usage:"]  → "Usage: context 16%, plan 42%"
@@ -15,7 +17,7 @@
  * floating badge, innerText word counting (all were estimates or stalled work).
  */
 
-const EXT_VERSION = 'v.0.25';
+const EXT_VERSION = 'v.0.26';
 const CONTEXT_WINDOW = 200000; // standard Claude context window, used for ~token estimate
 
 const state = {
@@ -114,7 +116,7 @@ function renderInline() {
   }
 
   if (usage.contextPct === null) {
-    el.textContent = state.collapsed ? '▸' : `${EXT_VERSION} | usage n/a ▾`;
+    el.textContent = state.collapsed ? '▸' : 'usage n/a ▾';
     return;
   }
 
@@ -125,13 +127,43 @@ function renderInline() {
   } else {
     const tokensStr = `~${approxTokens.toLocaleString()} tok`;
     const planStr = usage.planPct !== null ? ` | plan ${usage.planPct}%` : '';
-    el.textContent = `${EXT_VERSION} | ctx ${usage.contextPct}% (${tokensStr})${planStr} ▾`;
+    el.textContent = `ctx ${usage.contextPct}% (${tokensStr})${planStr} ▾`;
   }
+}
+
+function renderVersionCorner() {
+  let el = document.getElementById('claude-ext-version-corner');
+  if (el && el.isConnected) return;
+
+  el = document.createElement('span');
+  el.id = 'claude-ext-version-corner';
+  // Inline styles only — the page's @layer CSS overrides stylesheets (HANDOFF.md §4).
+  // pointer-events:none so it can never block clicks on the page.
+  el.style.cssText = [
+    'position:fixed',
+    'bottom:4px',
+    'right:6px',
+    'z-index:2147483647',
+    'font-size:10px',
+    'font-weight:600',
+    'color:#667eea',
+    'opacity:0.7',
+    'pointer-events:none',
+    'user-select:none',
+    'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif'
+  ].join(';');
+  el.textContent = EXT_VERSION;
+  document.body.appendChild(el);
 }
 
 // No DOM observers (banned — broke the page in v0.4; see CLAUDE.md).
 // A cheap 2s interval: one querySelector + small text update.
-renderInline();
-setInterval(renderInline, 2000);
+// renderVersionCorner is a no-op after first attach (getElementById + isConnected).
+function tick() {
+  renderInline();
+  renderVersionCorner();
+}
+tick();
+setInterval(tick, 2000);
 
-console.log('✓ Claude HTML Renderer loaded - v.0.25');
+console.log('✓ Claude HTML Renderer loaded - v.0.26');

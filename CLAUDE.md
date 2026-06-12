@@ -247,6 +247,6 @@ When stuck on a task after 2-4 attempts: Don't keep trying fixes. Switch to Leve
 
 **Last Updated**: 2026-06-12  
 **Current Branch**: `claude/funny-cray-ydbigy`  
-**Current Version**: v.0.25  
+**Current Version**: v.0.26  
 **Versioning**: v.X.Y (2 digits only - v.0.10, v.0.11, etc.)  
-**Status**: v0.24 rewrite — extension is now a single inline usage display next to the model name (real ctx/plan % scraped from Claude's usage ring, collapsible). Chart/font/HTML-render features removed. Read HANDOFF.md first.
+**Status**: v0.26 — inline display next to the model name now shows usage info only (ctx/plan %, collapsible); the version number moved to a tiny fixed label in the bottom-right corner of the page. Read HANDOFF.md first.
