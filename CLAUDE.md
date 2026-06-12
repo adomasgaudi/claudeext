@@ -106,17 +106,37 @@ cd ext/
 zip -r ../claude-html-renderer.zip .
 ```
 
+## Debugging Methodology (#debug #remember)
+
+**When something breaks: Exponential/doubling approach**
+1. Start with 1/10th of the task complexity
+2. Test it works
+3. If yes → do 2/10ths, then 4/10ths, then 8/10ths, etc. (doubling)
+4. If no → go to 1/100th (baby steps)
+
+**Debugging philosophy: Component isolation**
+- Like checking a broken TV: check wires first, test wire in different setting, check outlet with other devices
+- Always check each component separately
+- Start from what you KNOW works and build incrementally
+- Never add multiple things at once
+
+**Example**: Chart broke the page
+- ✓ We know v.0.3 (yellow text) worked
+- ✗ v.0.4 (MutationObserver + chart) broke it
+- Solution: Go back to yellow text (1/10th effort), add something tiny first
+
 ## Future AI Instructions
 
 - **Always check version** before marking tasks complete — it should be updated in all relevant files
 - **Test in browser** for any UI changes — don't just verify code logic
 - **Document DOM issues** if they arise — include actual selectors from `claude.ai`'s DOM
 - **Keep this file updated** as new features or issues emerge
+- **When debugging**: Use exponential approach (1/10th → 2/10th → 4/10th → 8/10th)
 
 ---
 
 **Last Updated**: 2026-06-12  
 **Current Branch**: `claude/funny-cray-ydbigy`  
-**Current Version**: v.0.4  
-**Versioning**: v.X.Y (X=major, Y=increments for features, .Z for patches)  
-**Status**: Dynamic chart that updates on Claude responses (MutationObserver monitoring)
+**Current Version**: v.0.4.1  
+**Versioning**: v.X.Y.Z (X=major, Y=features, Z=patches/small changes)  
+**Status**: Debugging - v.0.4 broke page, reverted to minimal element (1/10th effort)
