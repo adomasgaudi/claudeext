@@ -65,10 +65,12 @@ Example output:
 6. **Deploy** — push to `main` for live deployment
 
 ### Main Branch Strategy
-- **`main`** = production branch (always deployable)
+- **`main`** = production branch (always deployable, source of truth)
 - **`claude/funny-cray-ydbigy`** = development branch
-- **Workflow**: Develop → Commit → Push to dev → Merge to main → Deploy
+- **Workflow**: Develop → Commit → Push to dev → **Merge to main** → **Push to main**
+- **CRITICAL**: Always merge changes from dev to main and push to main
 - All releases and live changes go through `main` branch only
+- `main` is the canonical branch that gets deployed
 
 ### Git Push
 - Use `git push -u origin <branch-name>` for first push
