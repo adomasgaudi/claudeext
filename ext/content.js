@@ -1,7 +1,7 @@
 /**
- * Claude HTML Renderer Extension v.0.13
+ * Claude HTML Renderer Extension v.0.14
  *
- * 4/10ths: Robust HTML extraction and rendering
+ * 4/10ths: Search within code blocks for markers
  * Parse special markers from Claude responses:
  * - Font size: <!-- FONT-SIZE: 24 -->
  * - Render HTML: <!-- RENDER-HTML --> <button>Click</button>
@@ -207,10 +207,10 @@ function injectElements() {
 
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
-  versionBadge.textContent = 'v.0.13';
+  versionBadge.textContent = 'v.0.14';
   document.body.appendChild(versionBadge);
 
-  console.log('✓ Claude HTML Renderer loaded - v.0.13');
+  console.log('✓ Claude HTML Renderer loaded - v.0.14');
 }
 
 injectElements();
