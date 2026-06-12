@@ -1,6 +1,6 @@
 # Claude HTML Renderer Extension
 
-**Version: 1.4.0**
+**Version: v.0.4**
 
 A browser extension that renders HTML code blocks in Claude chat as live previews.
 
@@ -33,18 +33,18 @@ For permanent Firefox installation:
 
 ## Testing
 
-**Current version (1.4.0)**: Injects custom HTML components into the page.
+**Current version (v.0.4)**: Injects a bar chart diagram and version badge.
 
-When you load the extension and visit claude.ai, you should see a custom panel in the bottom-right corner with:
-- 🚀 Extension Active
-- Version badge (v1.4.0)
+When you load the extension and visit claude.ai, you should see:
+- **Chart panel** (top-right): A simple SVG bar chart showing demo data
+- **Version badge** (bottom-right): Small badge showing "v.0.4"
 
 You'll also see the console message:
 ```
-✓ Claude HTML Renderer loaded - custom components injected
+✓ Claude HTML Renderer loaded - v.0.4
 ```
 
-To check: Press `F12` → Console tab → look for the message. The custom panel should be visible in the bottom-right corner.
+To check: Press `F12` → Console tab → look for the message. The chart should be visible in the top-right corner.
 
 ## Usage
 
@@ -90,4 +90,4 @@ The extension will:
 - **Extension not working?** Make sure Developer mode is on, and the extension is enabled in your Extensions menu
 - **Preview not showing?** Refresh the page, or click the extension icon → check if it's active
 - **Scripts not running?** Make sure the `<!-- RENDER -->` marker is on the first line of the HTML block
-- **Panel not showing (v1.4)?** Check console with F12 → Console, look for the message. The panel should appear in the bottom-right corner. If you don't see it, the extension may not have injected properly.
+- **Chart not showing (v.0.4)?** Check console with F12 → Console, look for the message. The chart should appear in the top-right corner, version badge in bottom-right. If you don't see them, the extension may not have injected properly.

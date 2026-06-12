@@ -115,5 +115,6 @@ zip -r ../claude-html-renderer.zip .
 
 **Last Updated**: 2026-06-12  
 **Current Branch**: `claude/funny-cray-ydbigy`  
-**Current Version**: 1.4.0  
-**Status**: Testing custom HTML components - panel injection
+**Current Version**: v.0.4  
+**Versioning**: v.X.Y (X=major, Y=increments for features, .Z for patches)  
+**Status**: Testing chart/diagram injection - SVG bar chart demo
