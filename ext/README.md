@@ -1,6 +1,6 @@
 # Claude HTML Renderer Extension
 
-**Version: 1.3.0**
+**Version: 1.4.0**
 
 A browser extension that renders HTML code blocks in Claude chat as live previews.
 
@@ -33,14 +33,18 @@ For permanent Firefox installation:
 
 ## Testing
 
-**Current version (1.3.0)**: Highlights Claude's responses in yellow with bigger font.
+**Current version (1.4.0)**: Injects custom HTML components into the page.
 
-When you load the extension and visit claude.ai, Claude's response messages should appear in yellow and larger font. If this works, you'll see the console message:
+When you load the extension and visit claude.ai, you should see a custom panel in the bottom-right corner with:
+- 🚀 Extension Active
+- Version badge (v1.4.0)
+
+You'll also see the console message:
 ```
-✓ Claude HTML Renderer loaded - Claude responses highlighted yellow
+✓ Claude HTML Renderer loaded - custom components injected
 ```
 
-To check: Press `F12` → Console tab → look for the checkmark message. Your messages should be normal, Claude's responses should be yellow and bigger.
+To check: Press `F12` → Console tab → look for the message. The custom panel should be visible in the bottom-right corner.
 
 ## Usage
 
@@ -86,4 +90,4 @@ The extension will:
 - **Extension not working?** Make sure Developer mode is on, and the extension is enabled in your Extensions menu
 - **Preview not showing?** Refresh the page, or click the extension icon → check if it's active
 - **Scripts not running?** Make sure the `<!-- RENDER -->` marker is on the first line of the HTML block
-- **Responses not yellow (v1.3)?** Check console with F12 → Console, look for the checkmark message. May need DOM selector adjustment based on Claude's actual chat structure.
+- **Panel not showing (v1.4)?** Check console with F12 → Console, look for the message. The panel should appear in the bottom-right corner. If you don't see it, the extension may not have injected properly.
