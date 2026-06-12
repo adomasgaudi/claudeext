@@ -115,5 +115,5 @@ zip -r ../claude-html-renderer.zip .
 
 **Last Updated**: 2026-06-12  
 **Current Branch**: `claude/funny-cray-ydbigy`  
-**Current Version**: 1.2.0  
-**Status**: Testing phase - simplified to blue text for basic functionality verification
+**Current Version**: 1.3.0  
+**Status**: Testing - highlighting Claude responses (yellow + bigger font)

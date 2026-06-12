@@ -1,18 +1,25 @@
 /**
  * Claude HTML Renderer Extension
  *
- * Simple test: Turn all text blue on Claude chat
+ * Highlight Claude's responses: yellow text + bigger font
  */
 
-function makeTextBlue() {
+function highlightClaudeResponses() {
   const style = document.createElement('style');
   style.textContent = `
-    body * {
-      color: blue !important;
+    /* Target Claude's response messages */
+    [data-message-role="assistant"],
+    [data-role="assistant"],
+    .message.assistant,
+    .response,
+    [class*="response"][class*="message"],
+    [class*="assistant"] {
+      color: yellow !important;
+      font-size: 1.2em !important;
     }
   `;
   document.head.appendChild(style);
 }
 
-makeTextBlue();
-console.log('✓ Claude HTML Renderer loaded - text turned blue');
+highlightClaudeResponses();
+console.log('✓ Claude HTML Renderer loaded - Claude responses highlighted yellow');
