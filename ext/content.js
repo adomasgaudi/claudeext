@@ -102,6 +102,37 @@ function renderHTML() {
   }
 }
 
+function debugCodeBlocks() {
+  // Level 3: Learn DOM structure without trying to complete the task
+  const allElements = document.querySelectorAll('*');
+  const codeBlockCandidates = [];
+
+  allElements.forEach(el => {
+    const text = el.innerText || '';
+    if (text.includes('RENDER-HTML') && el.children.length < 50) {
+      codeBlockCandidates.push({
+        tag: el.tagName,
+        classes: el.className,
+        text: text.substring(0, 100),
+        children: el.children.length
+      });
+    }
+  });
+
+  if (codeBlockCandidates.length > 0) {
+    console.log('🔍 Found code block candidates with RENDER-HTML:', codeBlockCandidates);
+  } else {
+    console.log('🔍 No code blocks with RENDER-HTML found. Checking page structure...');
+    const preBlocks = document.querySelectorAll('pre, code');
+    console.log('  Found', preBlocks.length, 'pre/code elements');
+    preBlocks.forEach((block, i) => {
+      if (i < 3) {
+        console.log(`  Block ${i}:`, block.tagName, block.className, block.innerText?.substring(0, 50));
+      }
+    });
+  }
+}
+
 function injectElements() {
   const chartSvg = `
     <svg width="280" height="180" viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
@@ -205,12 +236,32 @@ function injectElements() {
   renderButton.onclick = renderHTML;
   document.body.appendChild(renderButton);
 
+  const debugButton = document.createElement('button');
+  debugButton.className = 'claude-ext-button';
+  debugButton.textContent = 'Debug Info';
+  debugButton.style.right = '680px';
+  debugButton.style.background = '#764ba2';
+  debugButton.onclick = () => {
+    const preBlocks = document.querySelectorAll('pre, code, [role="document"], article');
+    alert(`Found ${preBlocks.length} potential code blocks. Check console for details.`);
+    console.log('Detailed block info:', Array.from(preBlocks).map(b => ({
+      tag: b.tagName,
+      class: b.className,
+      hasRenderHTML: b.innerText?.includes('RENDER-HTML') || false,
+      textPreview: b.innerText?.substring(0, 80) || '(no text)'
+    })));
+  };
+  document.body.appendChild(debugButton);
+
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
   versionBadge.textContent = 'v.0.14';
   document.body.appendChild(versionBadge);
 
   console.log('✓ Claude HTML Renderer loaded - v.0.14');
+
+  // Level 3: Debug the DOM structure
+  debugCodeBlocks();
 }
 
 injectElements();
