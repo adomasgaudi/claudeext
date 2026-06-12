@@ -36,52 +36,58 @@ function applyFontSize() {
 }
 
 function renderHTML() {
-  // 4/10ths: Simpler extraction that worked before + better rendering
-  const bodyText = document.body.innerText;
-  const markerIndex = bodyText.indexOf('<!-- RENDER-HTML -->');
+  // 4/10ths: Search within code blocks, not entire page text
 
-  if (markerIndex === -1) {
-    alert('❌ No marker found');
-    return;
-  }
+  // Find all code blocks on the page
+  const codeBlocks = document.querySelectorAll('pre, code, [data-code]');
+  let foundHTML = '';
 
-  // Extract everything after marker
-  const afterMarker = bodyText.substring(markerIndex + 21).trim();
-  const lines = afterMarker.split('\n');
+  for (const block of codeBlocks) {
+    const blockText = block.innerText || block.textContent;
+    if (blockText.includes('<!-- RENDER-HTML -->')) {
+      const markerIndex = blockText.indexOf('<!-- RENDER-HTML -->');
+      const afterMarker = blockText.substring(markerIndex + 21).trim();
+      const lines = afterMarker.split('\n');
 
-  let htmlContent = '';
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const trimmed = line.trim();
+      let htmlContent = '';
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const trimmed = line.trim();
 
-    // Skip empty lines at start
-    if (!trimmed && !htmlContent) continue;
+        // Skip empty lines at start
+        if (!trimmed && !htmlContent) continue;
 
-    // Stop at next comment/marker
-    if (trimmed.startsWith('<!--')) break;
+        // Stop at next comment
+        if (trimmed.startsWith('<!--')) break;
 
-    // Collect lines that look like HTML
-    if (trimmed.startsWith('<') || htmlContent) {
-      htmlContent += line + '\n';
+        // Collect lines that look like HTML
+        if (trimmed.startsWith('<') || htmlContent) {
+          htmlContent += line + '\n';
+        }
+      }
+
+      htmlContent = htmlContent.trim();
+      if (htmlContent) {
+        foundHTML = htmlContent;
+        break;
+      }
     }
   }
 
-  htmlContent = htmlContent.trim();
-
-  if (!htmlContent) {
-    alert('❌ Found marker but no HTML content');
-    console.log('Debug: afterMarker =', afterMarker.substring(0, 200));
+  if (!foundHTML) {
+    alert('❌ No marker found in code blocks');
+    console.log('Debug: Checked', codeBlocks.length, 'code blocks');
     return;
   }
 
-  console.log('📍 Extracted HTML:', htmlContent);
+  console.log('📍 Extracted HTML:', foundHTML);
 
   // Try to render it
   const container = document.createElement('div');
   container.className = 'claude-ext-html-render';
 
   try {
-    container.innerHTML = htmlContent;
+    container.innerHTML = foundHTML;
     const existingRender = document.querySelector('.claude-ext-html-render');
     if (existingRender) {
       existingRender.replaceWith(container);
