@@ -36,7 +36,7 @@ function applyFontSize() {
 }
 
 function renderHTML() {
-  // 4/10ths: Robust HTML extraction and rendering with better handling
+  // 4/10ths: Simpler extraction that worked before + better rendering
   const bodyText = document.body.innerText;
   const markerIndex = bodyText.indexOf('<!-- RENDER-HTML -->');
 
@@ -45,37 +45,24 @@ function renderHTML() {
     return;
   }
 
-  // Extract everything after marker until next marker or end of content
-  const afterMarker = bodyText.substring(markerIndex + 21);
-  const nextMarkerIndex = afterMarker.indexOf('<!--');
-  let potentialContent = nextMarkerIndex > 0
-    ? afterMarker.substring(0, nextMarkerIndex)
-    : afterMarker;
+  // Extract everything after marker
+  const afterMarker = bodyText.substring(markerIndex + 21).trim();
+  const lines = afterMarker.split('\n');
 
-  const lines = potentialContent.split('\n');
   let htmlContent = '';
-  let collectingHTML = false;
-
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
+    const line = lines[i];
+    const trimmed = line.trim();
 
-    // Start collecting once we see an opening tag
-    if (line.startsWith('<')) {
-      collectingHTML = true;
-    }
+    // Skip empty lines at start
+    if (!trimmed && !htmlContent) continue;
 
-    if (collectingHTML) {
+    // Stop at next comment/marker
+    if (trimmed.startsWith('<!--')) break;
+
+    // Collect lines that look like HTML
+    if (trimmed.startsWith('<') || htmlContent) {
       htmlContent += line + '\n';
-
-      // Stop if we see a complete closing tag (basic heuristic)
-      if (line.includes('</') && line.includes('>')) {
-        // Check if this looks like a complete document
-        const openCount = (htmlContent.match(/</g) || []).length;
-        const closeCount = (htmlContent.match(/>/g) || []).length;
-        if (openCount > 0 && closeCount > 0 && openCount === closeCount) {
-          break;
-        }
-      }
     }
   }
 
@@ -83,6 +70,7 @@ function renderHTML() {
 
   if (!htmlContent) {
     alert('❌ Found marker but no HTML content');
+    console.log('Debug: afterMarker =', afterMarker.substring(0, 200));
     return;
   }
 
