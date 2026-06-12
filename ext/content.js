@@ -6,20 +6,27 @@
  */
 
 function applyFontSize() {
-  // Search for font size marker in the page
+  // Search for LAST (most recent) font size marker in the page
   const bodyText = document.body.innerText;
-  const fontSizeMatch = bodyText.match(/FONT-SIZE:\s*(\d+)/);
+  const matches = [...bodyText.matchAll(/FONT-SIZE:\s*(\d+)/g)];
 
-  if (fontSizeMatch) {
-    const fontSize = fontSizeMatch[1];
+  if (matches.length > 0) {
+    const lastMatch = matches[matches.length - 1];
+    const fontSize = lastMatch[1];
+
+    // Remove old styles and apply new one
+    const oldStyle = document.querySelector('.claude-ext-font-style');
+    if (oldStyle) oldStyle.remove();
+
     const style = document.createElement('style');
+    style.className = 'claude-ext-font-style';
     style.textContent = `
       body, body * {
         font-size: ${fontSize}px !important;
       }
     `;
     document.head.appendChild(style);
-    console.log(`✓ Applied font size: ${fontSize}px`);
+    console.log(`✓ Applied font size: ${fontSize}px (latest of ${matches.length} markers)`);
     alert(`Font size updated to ${fontSize}px`);
   } else {
     alert('No FONT-SIZE marker found in page');

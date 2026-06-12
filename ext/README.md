@@ -1,6 +1,6 @@
 # Claude HTML Renderer Extension
 
-**Version: v.0.7**
+**Version: v.0.8**
 
 A browser extension that renders HTML code blocks in Claude chat as live previews.
 
@@ -33,18 +33,18 @@ For permanent Firefox installation:
 
 ## Testing
 
-**Current version (v.0.7)**: Parses special markers from Claude responses.
+**Current version (v.0.8)**: Parses LATEST marker from Claude responses.
 
 When you load the extension and visit claude.ai:
 1. **Chart** (top-right): Static bar chart
-2. **Apply Font Size button** (top-left): Scans page for FONT-SIZE marker
-3. **Version badge** (bottom-right): Shows "v.0.7"
+2. **Apply Font Size button** (top-left): Scans for the MOST RECENT FONT-SIZE marker
+3. **Version badge** (bottom-right): Shows "v.0.8"
 
 How to use:
 1. Ask Claude to output a marker like: `<!-- FONT-SIZE: 24 -->`
 2. Claude outputs the marker
 3. Click "Apply Font Size" button
-4. Extension finds the marker and updates chat text size
+4. Extension finds the LATEST marker and updates chat text size
 
 Console message:
 ```
