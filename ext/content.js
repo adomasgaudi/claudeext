@@ -117,7 +117,7 @@ function injectElements() {
 
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
-  versionBadge.textContent = 'v.0.7';
+  versionBadge.textContent = 'v.0.8.1';
   document.body.appendChild(versionBadge);
 
   console.log('✓ Claude HTML Renderer loaded - v.0.8.1');
