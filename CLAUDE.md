@@ -115,4 +115,5 @@ zip -r ../claude-html-renderer.zip .
 
 **Last Updated**: 2026-06-12  
 **Current Branch**: `claude/funny-cray-ydbigy`  
-**Current Version**: [To be set in initial commit]
+**Current Version**: 1.1.0  
+**Status**: Testing phase - simplified to red text for basic functionality verification
