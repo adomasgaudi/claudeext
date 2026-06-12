@@ -152,6 +152,142 @@ The user provided a full HTML dump on 2026-06-12. Key verified selectors:
   stylesheet rules can be overridden — **use inline styles** for injected elements
   that must keep their look (this fixed the bold-model-name bug in v0.21).
 
+### Raw HTML excerpts (from the user's actual DOM dump, 2026-06-12, utility classes trimmed to `…`)
+
+**Virtualized transcript** — note the fixed-height spacer and translated rows; rows
+outside the viewport DO NOT EXIST in the DOM:
+
+```html
+<div data-testid="epitaxy-virtual-transcript" class="h-full overflow-y-auto overflow-x-hidden [contain:strict] …">
+  <div class="relative epitaxy-transcript-typography" style="height: 52284px;">
+    <div class="absolute top-0 left-0 w-full" style="transform: translateY(44412px);">
+      <div data-index="129">…</div>
+      <div data-index="130">…</div>
+      …
+    </div>
+  </div>
+</div>
+```
+
+**Assistant message:**
+
+```html
+<div data-epitaxy-entry="msg_01NhFszN7ptZowHMvptg9osf">
+  <div class="group/msg relative flex flex-col w-full">
+    <div class="flex flex-col gap-[var(--chat-item-gap)] select-text">
+      <div>
+        <div class="epitaxy-markdown">
+          <p>…response text…</p>
+          <h2>Session Summary</h2>
+          <code data-epitaxy-inline-code="">claude/funny-cray-ydbigy</code>
+          …
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+**User message:**
+
+```html
+<div data-epitaxy-entry="8ccacdc2-511a-43ac-8a4d-23423488bf0a">
+  <div class="group/msg flex justify-start items-start w-full">
+    <div class="epitaxy-user-turn flex flex-col gap-g6 max-w-[75%] min-w-0">
+      <div class="relative flex flex-col … bg-[var(--ui-user-message-background)] …">
+        <p class="text-body whitespace-pre-wrap [overflow-wrap:anywhere] text-pretty">ok, but it works but how does it work?</p>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+**Code block — THE critical structure.** Raw code is in `data-code-text`; the visible
+rendering is inside a `<template shadowrootmode="open">` shadow root that normal
+querySelector cannot reach:
+
+```html
+<div class="epitaxy-codeblock relative max-w-full w-fit">
+  <div class="relative">
+    <div data-code-text="function updateSessionTokenBadge(badge) {
+  // Step 1: Get ALL visible text on the page
+  const allText = document.body.innerText;
+  …entire raw code as one attribute value…
+}" class="epitaxy-diff rounded-r6 overflow-clip">
+      <diffs-container>
+        <template shadowrootmode="open">
+          <pre data-file="" data-disable-line-numbers="" data-overflow="wrap">
+            <code data-code="">
+              <div data-gutter="">…line numbers…</div>
+              <div data-content="">
+                <div data-line="1" data-line-type="context">
+                  <span style="--diffs-token-light:#C5621B;…">function</span>…
+                </div>
+              </div>
+            </code>
+          </pre>
+        </template>
+      </diffs-container>
+    </div>
+    <!-- copy button overlay -->
+    <button aria-label="Copy code">…</button>
+  </div>
+</div>
+```
+
+**Composer (input box):**
+
+```html
+<div class="epitaxy-prompt relative isolate rounded-r7 …">
+  <div class="epitaxy-prompt-input flex-1 min-w-0 …">
+    <div contenteditable="true" enterkeyhint="enter" aria-label="Prompt" translate="no"
+         class="tiptap ProseMirror" tabindex="0">
+      <p data-placeholder="Type / for commands" class="is-empty is-editor-empty …"><br></p>
+    </div>
+  </div>
+  <button aria-label="Send" disabled>…</button>
+</div>
+```
+
+**Bottom toolbar (permission mode, model, effort, usage ring)** — the model name is
+the visible text of a dropdown button; read it live from here:
+
+```html
+<div class="w-full flex items-center gap-g5 py-[4px]">
+  <button aria-haspopup="menu" aria-expanded="false">
+    <span class="min-w-0 overflow-x-clip text-ellipsis whitespace-nowrap">Accept edits</span>
+  </button>
+  …
+  <div class="ml-auto flex items-center gap-g4">
+    <button aria-haspopup="menu">  <!-- MODEL SELECTOR -->
+      <span class="min-w-0 overflow-x-clip text-ellipsis whitespace-nowrap">Fable 5</span>
+    </button>
+    <button aria-haspopup="dialog"> <!-- EFFORT -->
+      <span class="sr-only">Effort: </span><span>High</span>
+    </button>
+    <button aria-label="Usage: context 16%, plan 42%" aria-haspopup="dialog"> <!-- USAGE RING -->
+      <svg width="12" height="12" viewBox="0 0 12 12" class="-rotate-90">
+        <circle … stroke="var(--t3)"></circle>
+        <circle … stroke-dasharray="31.41…" stroke-dashoffset="26.38…" stroke="var(--accent)"></circle>
+      </svg>
+    </button>
+  </div>
+</div>
+```
+
+Note on the usage ring: `aria-label="Usage: context 16%, plan 42%"` is Claude's own
+real context/plan usage — scrape this attribute for genuine (if coarse) usage data
+on the browser side. The dashoffset on the second circle encodes the same percentage.
+
+**Header/title bar (top):** repo origin button (`[data-testid="epitaxy-origin-label"]`
+→ "claudeext"), session title, tasks badge (`.epitaxy-tasks-badge`), Share button,
+Views dropdown.
+
+**Branch row (above composer):** `.epitaxy-branch-row` with repo button ("claudeext"),
+branch button ("claude/funny-cray-ydbigy"), diffstat
+(`<span class="text-extended-green">+469</span><span class="text-extended-pink">−43</span>`),
+and a split "Create PR" button.
+
 ---
 
 ## 5. PROJECT RULES (the user enforces these — violations got called out)
