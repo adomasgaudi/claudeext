@@ -203,15 +203,16 @@ Work on 3 parallel tracks to avoid getting stuck:
 
 When stuck on a task after 2-4 attempts: Don't keep trying fixes. Switch to Level 2 or Level 1, come back later with fresh perspective.
 
-## Token Usage Tracking (#remember)
+## Token Usage Tracking (#remember #never)
 
-**Show token costs for every major prompt/work block:**
-- After significant sections of work, display estimated token usage
-- Track in `.claude/token-tracking.md` for reference
-- Format: `[Prompt #N] Task: X tokens, ~$Y cost`
-- Helps identify expensive operations and optimize workflow
+**EVERY RESPONSE must show exact token count at the end:**
+- Format: `📊 Tokens: [count] | Session total: [cumulative]`
+- Calculate based on: word count × 1.3 (with code adjustments +50%)
+- Display after all substantial responses
+- Track cumulatively in `.claude/token-tracking.md`
+- Update session file with running total
 
-**This is NOT optional.** Token awareness is part of responsible development.
+**This is NON-NEGOTIABLE.** Every single response needs this.
 
 ## Future AI Instructions
 
