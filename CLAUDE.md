@@ -155,6 +155,43 @@ Before every git commit:
 - ✗ v.0.4 (MutationObserver + chart) broke it
 - Solution: Go back to yellow text (1/10th effort), add something tiny first
 
+## Rule Adherence Levels & Enforcement (#remember)
+
+Different rules require different enforcement mechanisms because documentation alone is not reliable:
+
+### Level 1: Guidelines (Documented only)
+**What**: Best practices, helpful patterns  
+**Examples**: "test in browser", "keep performance in mind"  
+**Enforcement**: Documented in CLAUDE.md, manual review  
+**Why**: These are contextual and flexible, don't need hard blocking
+
+### Level 2: Important (#remember)
+**What**: Rules that should be followed consistently  
+**Examples**: "use 1/10th debugging only when broken", "work in parallel on 3 levels"  
+**Enforcement**: Documented in CLAUDE.md + referenced in commit messages  
+**Why**: Important but allow flexibility if situation demands it
+
+### Level 3: Critical (#never)
+**What**: Absolute non-negotiable rules  
+**Examples**: "DO NOT use MutationObserver", "always update version numbers"  
+**Enforcement**: 
+- Documented in CLAUDE.md with ⚠️ warning
+- **Automated blocking via git pre-commit hook** (technical enforcement)
+- Cannot be bypassed, system enforces it
+
+**Current Critical Rules Needing Automation:**
+- ✅ Version numbers must be updated in: manifest.json, popup.html, content.js (header + console.log)
+  - Mechanism: Git pre-commit hook validates all 4 files have matching versions
+  - Status: ✅ ACTIVE in `.git/hooks/pre-commit`
+- ✅ DO NOT use MutationObserver
+  - Mechanism: Git pre-commit hook blocks commits containing "MutationObserver" in content.js
+  - Status: ✅ ACTIVE in `.git/hooks/pre-commit`
+
+**How to ensure compliance:**
+1. **Documentation** = readable but forgettable (Level 1-2)
+2. **Git hooks** = automated, impossible to forget (Level 3)
+3. **Code review** = human verification (backup)
+
 ## Three-Level Work Strategy (#remember)
 
 Work on 3 parallel tracks to avoid getting stuck:
