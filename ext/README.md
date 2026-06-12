@@ -1,6 +1,6 @@
 # Claude HTML Renderer Extension
 
-**Version: v.0.9**
+**Version: v.0.9.1**
 
 A browser extension that renders HTML code blocks in Claude chat as live previews.
 

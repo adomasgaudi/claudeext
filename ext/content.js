@@ -1,5 +1,5 @@
 /**
- * Claude HTML Renderer Extension v.0.9
+ * Claude HTML Renderer Extension v.0.9.1
  *
  * Parse special markers from Claude responses:
  * - Font size: <!-- FONT-SIZE: 24 -->
@@ -35,30 +35,48 @@ function applyFontSize() {
 }
 
 function renderHTML() {
-  // Search for RENDER-HTML marker and extract HTML
-  const bodyHTML = document.body.innerHTML;
-  const renderMatch = bodyHTML.match(/<!-- RENDER-HTML -->\s*([\s\S]*?)(?=<\/code>|<\/pre>|$)/);
+  // Search for RENDER-HTML marker in text content
+  const bodyText = document.body.innerText;
+  const markerIndex = bodyText.indexOf('<!-- RENDER-HTML -->');
 
-  if (renderMatch) {
-    let htmlContent = renderMatch[1].trim();
-    // Clean up HTML entities if needed
-    htmlContent = htmlContent.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+  if (markerIndex !== -1) {
+    // Found marker, now search in HTML for the actual content
+    let htmlContent = '';
 
-    // Create container for rendered HTML
-    const container = document.createElement('div');
-    container.className = 'claude-ext-html-render';
-    container.innerHTML = htmlContent;
+    // Find all code blocks and search for the marker
+    const codeBlocks = document.querySelectorAll('pre code, code');
+    for (let block of codeBlocks) {
+      if (block.innerText.includes('<!-- RENDER-HTML -->')) {
+        // Extract content after marker
+        let text = block.innerText;
+        let contentStart = text.indexOf('<!-- RENDER-HTML -->') + '<!-- RENDER-HTML -->'.length;
+        htmlContent = text.substring(contentStart).trim();
 
-    // Insert before or after existing content
-    const existingRender = document.querySelector('.claude-ext-html-render');
-    if (existingRender) {
-      existingRender.replaceWith(container);
-    } else {
-      document.body.insertBefore(container, document.body.firstChild);
+        // Remove comment end if present
+        htmlContent = htmlContent.replace(/-->/g, '').trim();
+        break;
+      }
     }
 
-    console.log('✓ Rendered HTML');
-    alert('HTML rendered on page!');
+    if (htmlContent) {
+      // Create container for rendered HTML
+      const container = document.createElement('div');
+      container.className = 'claude-ext-html-render';
+      container.innerHTML = htmlContent;
+
+      // Replace or insert
+      const existingRender = document.querySelector('.claude-ext-html-render');
+      if (existingRender) {
+        existingRender.replaceWith(container);
+      } else {
+        document.body.insertBefore(container, document.body.firstChild);
+      }
+
+      console.log('✓ Rendered HTML:', htmlContent.substring(0, 50) + '...');
+      alert('HTML rendered on page!');
+    } else {
+      alert('Found marker but no HTML content');
+    }
   } else {
     alert('No RENDER-HTML marker found in page');
   }
@@ -169,10 +187,10 @@ function injectElements() {
 
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
-  versionBadge.textContent = 'v.0.9';
+  versionBadge.textContent = 'v.0.9.1';
   document.body.appendChild(versionBadge);
 
-  console.log('✓ Claude HTML Renderer loaded - v.0.9');
+  console.log('✓ Claude HTML Renderer loaded - v.0.9.1');
 }
 
 injectElements();
