@@ -1,7 +1,7 @@
 /**
- * Claude HTML Renderer Extension v.0.11
+ * Claude HTML Renderer Extension v.0.12
  *
- * 1/10th debugging: Just show extracted content, no rendering yet
+ * 2/10ths: Extract HTML and try rendering
  * Parse special markers from Claude responses:
  * - Font size: <!-- FONT-SIZE: 24 -->
  * - Render HTML: <!-- RENDER-HTML --> <button>Click</button>
@@ -36,7 +36,7 @@ function applyFontSize() {
 }
 
 function renderHTML() {
-  // 1/10th effort: Just find and show what's there, no rendering yet
+  // 2/10ths: Extract full HTML and try rendering
   const bodyText = document.body.innerText;
   const markerIndex = bodyText.indexOf('<!-- RENDER-HTML -->');
 
@@ -45,10 +45,49 @@ function renderHTML() {
     return;
   }
 
-  // Get text after marker (first 200 chars)
-  const afterMarker = bodyText.substring(markerIndex + 21, markerIndex + 221);
-  console.log('📍 Found marker. Content after marker:', afterMarker);
-  alert('✓ Marker found!\n\nContent preview:\n' + afterMarker.substring(0, 100));
+  // Extract everything after marker until we hit a line that doesn't look like HTML
+  const afterMarker = bodyText.substring(markerIndex + 21);
+  const lines = afterMarker.split('\n');
+
+  let htmlContent = '';
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue; // Skip empty lines
+    if (line.startsWith('<!--') && i > 0) break; // Stop at next comment
+    if (line.startsWith('<') || htmlContent) {
+      htmlContent += line + '\n';
+      if (line.endsWith('>') && htmlContent.includes('<') && htmlContent.includes('</')) {
+        break; // Found complete tag
+      }
+    }
+  }
+
+  htmlContent = htmlContent.trim();
+
+  if (!htmlContent) {
+    alert('❌ Found marker but no HTML content');
+    return;
+  }
+
+  console.log('📍 Extracted HTML:', htmlContent);
+
+  // Try to render it
+  const container = document.createElement('div');
+  container.className = 'claude-ext-html-render';
+
+  try {
+    container.innerHTML = htmlContent;
+    const existingRender = document.querySelector('.claude-ext-html-render');
+    if (existingRender) {
+      existingRender.replaceWith(container);
+    } else {
+      document.body.insertBefore(container, document.body.firstChild);
+    }
+    alert('✓ HTML rendered!');
+  } catch (e) {
+    alert('❌ Render error: ' + e.message);
+    console.error('Error:', e);
+  }
 }
 
 function injectElements() {
@@ -156,10 +195,10 @@ function injectElements() {
 
   const versionBadge = document.createElement('div');
   versionBadge.className = 'claude-ext-version';
-  versionBadge.textContent = 'v.0.11';
+  versionBadge.textContent = 'v.0.12';
   document.body.appendChild(versionBadge);
 
-  console.log('✓ Claude HTML Renderer loaded - v.0.11');
+  console.log('✓ Claude HTML Renderer loaded - v.0.12');
 }
 
 injectElements();
