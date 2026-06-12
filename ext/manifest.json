@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Claude HTML Renderer",
   "description": "Inline usage display next to the model name in Claude chat",
-  "version": "0.24",
+  "version": "0.25",
   "permissions": ["scripting"],
   "host_permissions": ["*://claude.ai/*", "*://www.anthropic.com/*"],
   "action": {

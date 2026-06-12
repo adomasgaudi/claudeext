@@ -1,5 +1,5 @@
 /**
- * Claude HTML Renderer Extension v.0.24
+ * Claude HTML Renderer Extension v.0.25
  *
  * Single feature: inline usage display next to the model name in the
  * bottom toolbar of claude.ai/code. No floating popups.
@@ -15,21 +15,54 @@
  * floating badge, innerText word counting (all were estimates or stalled work).
  */
 
-const EXT_VERSION = 'v.0.24';
+const EXT_VERSION = 'v.0.25';
 const CONTEXT_WINDOW = 200000; // standard Claude context window, used for ~token estimate
 
 const state = {
   collapsed: false
 };
 
+let lastLoggedLabel = null;
+
+function ringPctFromSvg(usageBtn) {
+  // Fallback: the ring itself encodes the percentage.
+  // Second <circle> has stroke-dasharray = circumference and
+  // stroke-dashoffset = circumference * (1 - pct).
+  const circles = usageBtn.querySelectorAll('svg circle');
+  if (circles.length < 2) return null;
+  const c = circles[1];
+  const dash = parseFloat(c.getAttribute('stroke-dasharray'));
+  const offset = parseFloat(c.getAttribute('stroke-dashoffset'));
+  if (!isFinite(dash) || !isFinite(offset) || dash <= 0) return null;
+  return Math.round((1 - offset / dash) * 100);
+}
+
 function readUsage() {
-  // Claude's own usage ring reports real percentages in its aria-label
-  const usageBtn = document.querySelector('button[aria-label^="Usage:"]');
+  // Claude's own usage ring reports real percentages in its aria-label.
+  // Match any button whose aria-label mentions usage/context (format may vary).
+  const usageBtn =
+    document.querySelector('button[aria-label^="Usage"]') ||
+    document.querySelector('button[aria-label*="context"]');
   if (!usageBtn) return null;
 
   const label = usageBtn.getAttribute('aria-label') || '';
-  const ctx = label.match(/context\s+(\d+)%/i);
-  const plan = label.match(/plan\s+(\d+)%/i);
+  // Tolerant: integers or decimals, "context 16%", "context: 16.5 %", etc.
+  const ctx = label.match(/context[^0-9]*?(\d+(?:\.\d+)?)\s*%/i);
+  const plan = label.match(/plan[^0-9]*?(\d+(?:\.\d+)?)\s*%/i);
+
+  let contextPct = ctx ? Math.round(parseFloat(ctx[1])) : null;
+  const planPct = plan ? Math.round(parseFloat(plan[1])) : null;
+
+  // Fallback: derive context % from the ring's SVG geometry
+  if (contextPct === null) {
+    contextPct = ringPctFromSvg(usageBtn);
+  }
+
+  // Debug: if we still can't parse, log the raw label once per change
+  if (contextPct === null && label !== lastLoggedLabel) {
+    lastLoggedLabel = label;
+    console.log('Claude ext: could not parse usage from aria-label:', JSON.stringify(label));
+  }
 
   // Model name: the dropdown button in the same right-side toolbar group
   let model = '';
@@ -40,8 +73,8 @@ function readUsage() {
   }
 
   return {
-    contextPct: ctx ? parseInt(ctx[1], 10) : null,
-    planPct: plan ? parseInt(plan[1], 10) : null,
+    contextPct: contextPct,
+    planPct: planPct,
     model: model,
     anchor: usageBtn
   };
@@ -101,4 +134,4 @@ function renderInline() {
 renderInline();
 setInterval(renderInline, 2000);
 
-console.log('✓ Claude HTML Renderer loaded - v.0.24');
+console.log('✓ Claude HTML Renderer loaded - v.0.25');
