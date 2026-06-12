@@ -143,6 +143,19 @@ Before every git commit:
 
 No long prose. The reader picks their depth.
 
+## Cost Table After Every Response (#remember #never)
+
+**END EVERY RESPONSE with the real cost table for the last 5 prompts.**
+- Run `python3 scripts/show-cost.py` to get REAL numbers from the transcript.
+- Show columns: `# | prompt | model | out tok | cache read | turn $`.
+- The data lags one turn — the current turn isn't in the transcript until the
+  Stop hook fires after this reply, so "last 5" = the 5 most recent COMPLETED turns.
+- Also append the hidden marker line `⟦COSTDATA⟧[…]⟦END⟧` (full session JSON)
+  at the very end — the extension's `$` button scrapes it from the reply DOM
+  (the Stop hook's stdout does NOT reach the page, so the marker must live in
+  the visible reply text).
+- Numbers must be REAL (from the transcript). Never fabricate.
+
 ## Debugging Methodology (#debug #remember)
 
 **1/10th approach is ONLY for broken features, not for building known-good ones**
@@ -256,6 +269,6 @@ When stuck on a task after 2-4 attempts: Don't keep trying fixes. Switch to Leve
 
 **Last Updated**: 2026-06-12  
 **Current Branch**: `claude/funny-cray-ydbigy`  
-**Current Version**: v.0.29  
+**Current Version**: v.0.30  
 **Versioning**: v.X.Y (2 digits only - v.0.10, v.0.11, etc.)  
-**Status**: v0.29 — REAL per-prompt cost. `scripts/show-cost.py` parses the on-disk transcript and (via the Stop hook) prints a full cost table every turn plus a hidden `⟦COSTDATA⟧…⟦END⟧` JSON marker. The extension's new `$` button scrapes that marker from the chat DOM and renders the per-prompt table (#, prompt, model, out, cache read, turn $, session total). Pre-commit hook now also enforces a version INCREMENT on every commit. Read HANDOFF.md first.
+**Status**: v0.30 — cost marker now rides in the assistant's REPLY text (the Stop hook's stdout never reached the page DOM, so the `$` button showed "no data"); the `$` button scrapes it from the visible reply. Panels now close on outside-click. New #remember rule: end every reply with the real last-5-prompts cost table + marker. Read HANDOFF.md first.

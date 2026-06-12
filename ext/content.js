@@ -1,5 +1,5 @@
 /**
- * Claude HTML Renderer Extension v.0.29
+ * Claude HTML Renderer Extension v.0.30
  *
  * Elements (all static injection, no observers):
  * - inline token info next to the model name in the bottom toolbar:
@@ -17,7 +17,7 @@
  *   extension.
  */
 
-const EXT_VERSION = 'v.0.29';
+const EXT_VERSION = 'v.0.30';
 const CONTEXT_WINDOW = 200000; // standard Claude context window, used for token estimates
 const LOG_KEY = 'claudeExtTokenLog';
 const EPISODE_GAP_MS = 15000;  // ctx increases closer than this merge into one "prompt"
@@ -31,8 +31,9 @@ const state = {
   sessionStart: Date.now()
 };
 
-// Marker emitted by scripts/show-cost.py (Stop hook) into the chat. Contains
-// the FULL session cost table as JSON; we read the latest one we can see.
+// Cost marker embedded in the assistant's reply text (the Stop hook's stdout
+// does not reach this page). Carries the FULL session cost table as JSON;
+// we read the latest one we can see in the DOM.
 const COST_RE = /⟦COSTDATA⟧(\[.*?\])⟦END⟧/g;
 
 let lastLoggedLabel = null;
@@ -179,8 +180,10 @@ function getPanel() {
 }
 
 function scrapeCostData() {
-  // The latest Stop-hook marker in the chat carries the full table.
-  // Transcript is virtualized but the newest hook output sits at the bottom
+  // The latest cost marker in the chat carries the full table. It is emitted
+  // into the assistant's visible reply text (the Stop hook's stdout does NOT
+  // reach this page's DOM), so it lives in a normal, scrapeable message.
+  // Transcript is virtualized but the newest reply sits at the bottom
   // (visible), so the most recent match is the freshest complete table.
   const text = document.body.innerText || '';
   let m, last = null;
@@ -374,13 +377,37 @@ function renderVersionCorner() {
   document.body.appendChild(el);
 }
 
+// One click listener (bubble phase) to close panels on an outside click.
+// The toggle controls call stopPropagation, so their own clicks never reach
+// here — only genuine outside clicks do. No DOM observers; cheap.
+function installOutsideClose() {
+  if (state._outsideInstalled) return;
+  state._outsideInstalled = true;
+  document.addEventListener('click', function (e) {
+    const t = e.target;
+    const usagePanel = document.getElementById('claude-ext-usage-panel');
+    const costPanel = document.getElementById('claude-ext-cost-panel');
+    let changed = false;
+    if (!state.collapsed && usagePanel && !usagePanel.contains(t)) {
+      state.collapsed = true;
+      changed = true;
+    }
+    if (state.costOpen && costPanel && !costPanel.contains(t)) {
+      state.costOpen = false;
+      changed = true;
+    }
+    if (changed) renderInline();
+  });
+}
+
 // No DOM observers (banned — broke the page in v0.4; see CLAUDE.md).
 // A cheap 2s interval: one querySelector + small text update.
 function tick() {
   renderInline();
   renderVersionCorner();
+  installOutsideClose();
 }
 tick();
 setInterval(tick, 2000);
 
-console.log('✓ Claude HTML Renderer loaded - v.0.29');
+console.log('✓ Claude HTML Renderer loaded - v.0.30');
